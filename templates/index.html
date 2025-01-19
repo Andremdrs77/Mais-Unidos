@@ -4,8 +4,294 @@
 
 {% block titlePage %} Dashboard {% endblock %}
 
+{% block style %} 
+
+<style>
+    .search-bar {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .search-bar input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-bar .dropdown {
+        position: relative;
+        width: auto;
+    }
+
+    .search-bar .dropdown button {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #0d2329;
+        color: #fff;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .search-bar .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #ffffff;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+        z-index: 1;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .search-bar .dropdown-content button {
+        padding: 10px;
+        width: 100%;
+        border: none;
+        background-color: #fff;
+        color: #0d2329;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .search-bar .dropdown-content button:hover {
+        background-color: #f1f1f1;
+    }
+
+    .search-bar .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .tabs {
+        display: flex;
+        justify-content: space-between;
+        margin: 2% 0;
+        width: 100%;
+    }
+
+    .tabs .tab-buttons {
+        display: flex;
+        gap: 0;
+        width: 100%;
+    }
+
+    .tabs .tab-buttons button {
+        flex: 1;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-size: 14px;
+        font-weight: bold;
+        color: #b0b0b0;
+        cursor: pointer;
+        position: relative;
+        padding-bottom: 5px;
+    }
+
+    .tabs .tab-buttons button.active {
+        color: #05664f;
+    }
+
+    .tabs .tab-buttons button.active:after {
+        content: '';
+        display: block;
+        height: 3px;
+        width: 100%;
+        background-color: #05664f;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    .campaign-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+    }
+
+    .campaign-card {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+        box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+        flex: 1 1 calc(33.333% - 20px);
+        box-sizing: border-box;
+    }
+
+    .campaign-card h3 {
+        margin-bottom: 10px;
+        color: #05664f;
+    }
+
+    .campaign-card p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .campaign-card .progress-bar {
+        margin-top: 10px;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .campaign-card .progress-bar .progress {
+        height: 100%;
+        background-color: #05664f;
+        text-align: center;
+        color: #fff;
+        line-height: 20px;
+        width: 0%;
+    }
+
+    .campaign-card .donate-button {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #05664f;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .campaign-card .donate-button:hover {
+        background-color: #044f3b;
+    }
+
+    @media (max-width: 768px) {
+        .tabs .tab-buttons button {
+            font-size: 12px;
+        }
+
+        .search-bar {
+            flex-direction: column;
+        }
+
+        .search-bar input {
+            width: 100%;
+            margin-bottom: 3%;
+        }
+
+        .search-bar .dropdown {
+            width: 100%;
+            margin-bottom: 5%;
+        }
+
+        .tabs {
+            margin-bottom: 10%;
+        }
+    }
+</style>
+
+{% endblock %}
+
 {% block content %} 
 
-OLÁ ESSE É O DASHBOARD
+<div class="search-bar">
+    <input type="text" placeholder="Pesquisar campanhas...">
+    <div class="dropdown" id="period-dropdown">
+        <button>Selecionar período <i class="fa fa-chevron-down"></i></button>
+        <div class="dropdown-content">
+            <button data-period="7">Últimos 7 dias</button>
+            <button data-period="30">Últimos 30 dias</button>
+            <button data-period="60">Últimos 60 dias</button>
+            <button data-period="90">Últimos 90 dias</button>
+        </div>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="tab-buttons">
+        <button class="active" id="all-campaigns">TODAS AS CAMPANHAS</button>
+        <button id="top-campaigns">CAMPANHAS MAIS BEM-SUCEDIDAS</button>
+    </div>
+</div>
+
+<div id="campaign-container" class="campaign-container">
+    <!-- Exemplo de card de campanha -->
+    <div class="campaign-card">
+        <h3>Título da Campanha</h3>
+        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
+        <p><strong>Meta:</strong> R$ 10.000</p>
+        <p><strong>Prazo:</strong> 30/01/2025</p>
+        <p><strong>Status:</strong> Ativa</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: 70%;">70%</div>
+        </div>
+        <button class="donate-button">Doar</button>
+    </div>
+
+    <!-- Exemplo de card de campanha -->
+    <div class="campaign-card">
+        <h3>Título da Campanha</h3>
+        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
+        <p><strong>Meta:</strong> R$ 10.000</p>
+        <p><strong>Prazo:</strong> 30/01/2025</p>
+        <p><strong>Status:</strong> Ativa</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: 70%;">70%</div>
+        </div>
+        <button class="donate-button">Doar</button>
+    </div>
+
+    <!-- Exemplo de card de campanha -->
+    <div class="campaign-card">
+        <h3>Título da Campanha</h3>
+        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
+        <p><strong>Meta:</strong> R$ 10.000</p>
+        <p><strong>Prazo:</strong> 30/01/2025</p>
+        <p><strong>Status:</strong> Ativa</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: 70%;">70%</div>
+        </div>
+        <button class="donate-button">Doar</button>
+    </div>
+
+    <!-- Exemplo de card de campanha -->
+    <div class="campaign-card">
+        <h3>Título da Campanha</h3>
+        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
+        <p><strong>Meta:</strong> R$ 10.000</p>
+        <p><strong>Prazo:</strong> 30/01/2025</p>
+        <p><strong>Status:</strong> Ativa</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: 70%;">70%</div>
+        </div>
+        <button class="donate-button">Doar</button>
+    </div>
+
+    <!-- Repita os cards para cada campanha -->
+</div>
+
+<script>
+    document.getElementById('top-campaigns').addEventListener('click', function () {
+        document.getElementById('period-dropdown').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('all-campaigns').classList.remove('active');
+    });
+
+    document.getElementById('all-campaigns').addEventListener('click', function () {
+        document.getElementById('period-dropdown').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('top-campaigns').classList.remove('active');
+    });
+
+    document.querySelectorAll('.dropdown-content button').forEach(button => {
+        button.addEventListener('click', function () {
+            const period = this.getAttribute('data-period');
+            alert(`Filtrar campanhas por período: Últimos ${period} dias`);
+        });
+    });
+</script>
 
 {% endblock %}
