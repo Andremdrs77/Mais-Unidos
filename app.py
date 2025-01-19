@@ -19,7 +19,7 @@ def load_user(user_id):
 def index():
     return render_template('index.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/loginandregister', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -67,16 +67,32 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+
+@app.route('/campaign')
+def campaign():
+    return render_template('campaign.html')
+
+
+@app.route('/donations')
+def donations():
+    return render_template('donations.html')
+
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
