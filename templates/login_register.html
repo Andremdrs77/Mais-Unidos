@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='/images/favicon.png') }}">
+    <title>+ Unidos | Doações e Campanhas</title>
+</head>
+
+<body>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up">
+            <form>
+                <h1>Crie Sua Conta</h1>
+                <span>Use seu e-mail para se registrar</span>
+                <input id="r_name" type="text" placeholder="Nome">
+                <input id="r_email" type="email" placeholder="E-mail">
+                <input id="r_telefone" type="telephone" placeholder="Telefone">
+                <input id="r_password" type="password" placeholder="Senha">
+                <input id="r_confirmpassword" type="password" placeholder="Cofirme sua senha">
+                <button>Registrar</button>
+            </form>
+        </div>
+        <div class="form-container sign-in">
+            <form>
+                <h1>Entrar</h1>
+                <span>Use seu e-mail e senha</span>
+                <input id="l_email" type="email" placeholder="E-mail">
+                <input id="l_password" type="password" placeholder="Senha">
+                <a href="#">Esqueceu sua senha?</a>
+                <button>Entrar</button>
+            </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Bem-vindo de Volta!</h1>
+                    <div class="gif-container">
+                        <img src="{{ url_for('static', filename='images/logo_animada.gif') }}" alt="GIF de boas-vindas">
+                    </div>
+                    <p>Faça login com suas informações para gerenciar campanhas e doações.</p>
+                    <button class="hidden" id="login">Entrar</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    
+                    <h1>Olá, Amigo!</h1>
+                    <div class="gif-container">
+                        <img src="{{ url_for('static', filename='images/logo_animada.gif') }}" alt="GIF de boas-vindas">
+                    </div>
+                    <p>Crie sua conta e comece a fazer a diferença com + Unidos.</p>
+                    <button class="hidden" id="register">Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const registerBtn = document.getElementById('register');
+        const loginBtn = document.getElementById('login');
+
+        registerBtn.addEventListener('click', () => {
+            container.classList.add("active");
+        });
+
+        loginBtn.addEventListener('click', () => {
+            container.classList.remove("active");
+        });
+    </script>
+</body>
+
+</html>
