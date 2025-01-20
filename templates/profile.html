@@ -1,11 +1,121 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %} Perfil {% endblock %}
+{% block title %} Profile {% endblock %}
 
-{% block titlePage %} Perfil {% endblock %}
+{% block titlePage %} Profile {% endblock %}
 
-{% block content %} 
+{% block style %}
+<style>
+    .profile-page {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
 
-OLÁ ESSE É O PERFIL
+    .profile-container1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        width: 35%;
+        margin-right: 30px;
+        padding: 20px;
+        background-color: #0d2329;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        gap: 10px;
+    }
 
+    .profile-container1 h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #FFFFFF;
+    }
+
+    .profile-container1 img {
+        width: 200px;
+        height: 200px;
+        border-radius: 100px;
+    }
+
+    .profile-info1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .profile-info1 .info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        color: #FFFFFF;
+    }
+
+    .profile-info1 .info-item i {
+        font-size: 18px;
+    }
+
+    .profile-container2 {
+        display: flex;
+        flex-direction: column;
+        background-color: #f9f9f9;
+        width: 65%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        border-radius: 10px;
+        padding: 20px;
+        gap: 10px;
+    }
+
+    .profile-container2 h1 {
+        color: #0d2329;
+    }
+
+    .profile-info2 {
+        width: 100%;
+        height: 80px;
+        background-color: #c9c9c9;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        padding: 20px;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-container1">
+        <img src="/static/images/avatar.jpg" alt="profile_image">
+        <h2>Perfil do Usuário</h2>
+        <div class="profile-info1">
+            <div class="info-item">
+                <i class="fas fa-user"></i>
+                <p>Nome: Neguinho da XJ</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <p>Email: neguinho@example.com</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <p>Data de Registro: 01/01/2023</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <p>Telefone: (11) 98765-4321</p>
+            </div>
+        </div>
+    </div>
+    <div class="profile-container2">
+        <h1>Informações</h1>
+        <div class="profile-info2"></div>
+        <div class="profile-info2"></div>
+        <div class="profile-info2"></div>
+        <div class="profile-info2"></div>
+    </div>
+</div>
 {% endblock %}
