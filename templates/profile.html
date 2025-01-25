@@ -34,8 +34,8 @@
     }
 
     .profile-container1 img {
-        width: 150px; /* Define um tamanho fixo apropriado */
-        height: 150px; /* Mantém as proporções */
+        width: 60%; /* Define um tamanho fixo apropriado */
+        height: auto; /* Mantém as proporções */
         border-radius: 50%; /* Deixa a imagem circular */
         object-fit: cover; /* Garante que a imagem se ajuste bem ao espaço */
         border: 3px solid #05664f; /* Opcional: borda para destaque */
@@ -69,44 +69,53 @@
         font-size: 18px;
     }
 
-    .profile-container2 {
-        display: flex;
-        flex-direction: column;
-        background-color: #f9f9f9;
-        width: 65%;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-        border-radius: 10px;
-        padding: 20px;
-        gap: 10px;
-    }
+
 
     .profile-container2 h1 {
         color: #0d2329;
     }
 
-    .profile-info2 {
+    .profile-container2 {
         display: flex;
-        width: 100%;
-        height: auto;
-        flex-wrap: wrap;
+        flex-direction: column;
+        background-color: #f9f9f9;
+        width: 100%; 
+        max-width: 100%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        border-radius: 10px;
+        padding: 20px;
         gap: 10px;
-    }
+        box-sizing: border-box;
+        overflow: hidden; 
+}
+
+    .profile-info2 {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: auto;
+        gap: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+}
 
     .info2-items {
-        width: 225px;
+        width: 100%; 
         height: 95px;
         border: 2px solid #05664f;
         background-color: #F9F9F9;
         padding: 20px;
         border-radius: 10px;
+        box-sizing: border-box;
     }
 
-    .info2-buttons {
-        width: 100%;
-        height: 85px;
+        .info2-buttons {
+        grid-column: span 3;
         margin-top: 10px;
+        height: 85px;
         border: 2px solid #05664f;
         border-radius: 10px;
+        box-sizing: bord
     }
 
 
@@ -143,10 +152,10 @@
         }
 
         .profile-container1 {
-            width: 90%; /* Deixa o card ocupar quase toda a largura da tela */
-            margin: 0 auto; /* Centraliza o card */
-            padding: 10px; /* Reduz o padding para caber melhor */
-            gap: 5px; /* Menor espaçamento entre os elementos */
+            width: 90%; 
+            margin: 0 auto;
+            padding: 10px; 
+            gap: 5px; 
         }
 
         .profile-info1 .info-item {
