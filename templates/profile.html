@@ -34,11 +34,13 @@
     }
 
     .profile-container1 img {
-    max-width: 75%;
-    height: 50%;
-    border-radius: 50%;
-    object-fit: cover;
-    }
+        width: 150px; /* Define um tamanho fixo apropriado */
+        height: 150px; /* Mantém as proporções */
+        border-radius: 50%; /* Deixa a imagem circular */
+        object-fit: cover; /* Garante que a imagem se ajuste bem ao espaço */
+        border: 3px solid #05664f; /* Opcional: borda para destaque */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Suaviza o visual */
+}
 
     .profile-info1 {
         display: flex;
@@ -55,6 +57,12 @@
         gap: 10px;
         font-size: 16px;
         color: #FFFFFF;
+    }
+
+    .profile-info1 .info-item p {
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     .profile-info1 .info-item i {
@@ -77,13 +85,89 @@
     }
 
     .profile-info2 {
+        display: flex;
         width: 100%;
-        height: 80px;
-        background-color: #c9c9c9;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        height: auto;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .info2-items {
+        width: 225px;
+        height: 95px;
+        border: 2px solid #05664f;
+        background-color: #F9F9F9;
         padding: 20px;
         border-radius: 10px;
     }
+
+    .info2-buttons {
+        width: 100%;
+        height: 85px;
+        margin-top: 10px;
+        border: 2px solid #05664f;
+        border-radius: 10px;
+    }
+
+
+    @media (max-width: 768px) {
+        .profile-page {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-container1 {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .profile-container2 {
+            width: 100%;
+        }
+
+        .profile-info1 .info-item {
+            font-size: 20px;
+        }
+
+        .profile-container1 h2 {
+            font-size: 25px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        
+        .profile-page {
+            gap: 15px
+        }
+
+        .profile-container1 {
+            width: 90%; /* Deixa o card ocupar quase toda a largura da tela */
+            margin: 0 auto; /* Centraliza o card */
+            padding: 10px; /* Reduz o padding para caber melhor */
+            gap: 5px; /* Menor espaçamento entre os elementos */
+        }
+
+        .profile-info1 .info-item {
+            font-size: 10px;
+        }
+
+        .profile-container1 h2 {
+            font-size: 20px;
+        }
+
+        .profile-container1 img {
+            max-width: 50%;
+            height: auto; 
+        }
+
+        .profile-container2 {
+            width: 90%;
+        }
+
+    }
+
 </style>
 {% endblock %}
 
@@ -114,10 +198,18 @@
         </div>
         <div class="profile-container2">
             <h1>Informações</h1>
-            <div class="profile-info2"></div>
-            <div class="profile-info2"></div>
-            <div class="profile-info2"></div>
-            <div class="profile-info2"></div>
+            <div class="profile-info2">
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-items"></div>
+                <div class="info2-buttons"></div>
+            </div>
         </div>
     </div>
 </div>
