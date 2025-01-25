@@ -77,6 +77,9 @@ def profile():
 def campaign():
     return render_template('campaign.html')
 
+@app.route('/create-campaign')
+def create_campaign():
+    return render_template('create_campaign.html')
 
 @app.route('/donations')
 def donations():
