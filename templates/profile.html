@@ -34,9 +34,10 @@
     }
 
     .profile-container1 img {
-        width: 200px;
-        height: 200px;
-        border-radius: 100px;
+    max-width: 75%;
+    height: 50%;
+    border-radius: 50%;
+    object-fit: cover;
     }
 
     .profile-info1 {
@@ -88,34 +89,36 @@
 
 {% block content %}
 <div class="profile-page">
-    <div class="profile-container1">
-        <img src="/static/images/avatar.jpg" alt="profile_image">
-        <h2>Perfil do Usuário</h2>
-        <div class="profile-info1">
-            <div class="info-item">
-                <i class="fas fa-user"></i>
-                <p>Nome: Neguinho da XJ</p>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-envelope"></i>
-                <p>Email: neguinho@example.com</p>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-calendar-alt"></i>
-                <p>Data de Registro: 01/01/2023</p>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-phone"></i>
-                <p>Telefone: (11) 98765-4321</p>
+    <div class="profile-page">
+        <div class="profile-container1">
+            <img src="/static/images/avatar.jpg" alt="profile_image">
+            <h2>Perfil do Usuário</h2>
+            <div class="profile-info1">
+                <div class="info-item">
+                    <i class="fas fa-user"></i>
+                    <p>Nome: Neguinho da XJ</p>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <p>Email: neguinho@example.com</p>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <p>Data de Registro: 01/01/2023</p>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <p>Telefone: (11) 98765-4321</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="profile-container2">
-        <h1>Informações</h1>
-        <div class="profile-info2"></div>
-        <div class="profile-info2"></div>
-        <div class="profile-info2"></div>
-        <div class="profile-info2"></div>
+        <div class="profile-container2">
+            <h1>Informações</h1>
+            <div class="profile-info2"></div>
+            <div class="profile-info2"></div>
+            <div class="profile-info2"></div>
+            <div class="profile-info2"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
