@@ -22,6 +22,7 @@
         gap: 10px;
         margin-bottom: 20px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .search-bar input {
@@ -36,7 +37,7 @@
     }
 
     .search-bar .dropdown button {
-        padding: 10px;
+        padding: 11px;
         border: none;
         border-radius: 5px;
         background-color: #0d2329;
@@ -77,48 +78,99 @@
         display: block;
     }
 
-    .donations-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-bottom: 20px;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .donations-table th,
-    .donations-table td {
-        padding: 10px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-
-    .donations-table th {
-        background-color: #05664f;
-        color: #fff;
-        font-weight: 600;
-    }
-
-    .donations-table tbody tr:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
-
-    .donations-table tbody tr:nth-child(even) {
-        background-color: #fff;
-    }
-
     .export-button {
-        padding: 10px 20px;
+        flex: 1;
+        max-width: 200px;
+        padding: 11px;
         background-color: #0d2329;
         color: #fff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .export-button i {
+        font-size: 16px;
     }
 
     .export-button:hover {
         background-color: #08161a;
+    }
+
+    .donations-table {
+        display: none;
+    }
+
+    .donations-cards {
+        display: grid;
+        gap: 10px;
+    }
+
+    .donation-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: #fff;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .donation-card div {
+        margin-bottom: 8px;
+    }
+
+    .donation-card .label {
+        font-weight: bold;
+        color: #05664f;
+    }
+
+    .donation-card .value {
+        margin-left: 5px;
+    }
+
+    @media (min-width: 768px) {
+        .donations-table {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .donations-table th,
+        .donations-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .donations-table th {
+            background-color: #05664f;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .donations-table tbody tr {
+            display: table-row;
+        }
+
+        .donations-table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        .donations-table tbody tr:nth-child(even) {
+            background-color: #fff;
+        }
+
+        .donations-cards {
+            display: none;
+        }
     }
 </style>
 
@@ -137,7 +189,9 @@
             <button data-period="90">Últimos 90 dias</button>
         </div>
     </div>
-    <button class="export-button" id="export-pdf-button">Exportar Relatório (PDF)</button>
+    <button class="export-button" id="export-pdf-button">
+        <i class="fa fa-file-pdf"></i> Exportar Relatório
+    </button>
 </div>
 
 <div class="donations-container">
@@ -168,34 +222,55 @@
             </tr>
         </tbody>
     </table>
+
+    <div class="donations-cards" id="donations-cards">
+        <div class="donation-card">
+            <div><span class="label">ID:</span> <span class="value">1</span></div>
+            <div><span class="label">Campanha:</span> <span class="value">Campanha A</span></div>
+            <div><span class="label">Tipo de Doação:</span> <span class="value">Financeira</span></div>
+            <div><span class="label">Valor/Quantidade:</span> <span class="value">R$ 200,00</span></div>
+            <div><span class="label">Data:</span> <span class="value">01/01/2025</span></div>
+        </div>
+        <div class="donation-card">
+            <div><span class="label">ID:</span> <span class="value">2</span></div>
+            <div><span class="label">Campanha:</span> <span class="value">Campanha B</span></div>
+            <div><span class="label">Tipo de Doação:</span> <span class="value">Itens</span></div>
+            <div><span class="label">Valor/Quantidade:</span> <span class="value">10 kg de arroz</span></div>
+            <div><span class="label">Data:</span> <span class="value">15/01/2025</span></div>
+        </div>
+    </div>
 </div>
 
 <script>
     document.getElementById('search-input').addEventListener('input', function () {
         const filter = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.donation-card');
         const rows = document.querySelectorAll('#donations-table tbody tr');
 
+        cards.forEach(card => {
+            const match = Array.from(card.querySelectorAll('.value')).some(value => value.textContent.toLowerCase().includes(filter));
+            card.style.display = match ? '' : 'none';
+        });
+
         rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const match = Array.from(cells).some(cell => cell.textContent.toLowerCase().includes(filter));
+            const match = Array.from(row.querySelectorAll('td')).some(cell => cell.textContent.toLowerCase().includes(filter));
             row.style.display = match ? '' : 'none';
         });
     });
 
     document.getElementById('export-pdf-button').addEventListener('click', function () {
-        const { jsPDF } = window.jspdf; // Certifique-se de usar o namespace correto
+        const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         doc.text('Relatório de Doações', 14, 16);
-    
+
         doc.autoTable({
             html: '#donations-table',
             startY: 20,
-            theme: 'grid', // Adiciona bordas e uma aparência mais organizada
+            theme: 'grid',
         });
-    
+
         doc.save('relatorio_doacoes.pdf');
     });
-    
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>

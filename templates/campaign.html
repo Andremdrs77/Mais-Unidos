@@ -101,6 +101,7 @@
         gap: 10px;
         margin-bottom: 20px;
         align-items: center;
+        height: 50px;
     }
 
     .search-bar input {
@@ -115,7 +116,7 @@
     }
 
     .search-bar .dropdown button {
-        padding: 10px;
+        padding: 11px;
         border: none;
         border-radius: 5px;
         background-color: #0d2329;
@@ -187,5 +188,24 @@
         <button class="edit-button">Editar Campanha</button>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const createCampaignButton = document.getElementById('create-campaign-button');
+
+        createCampaignButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Evita redirecionamento imediato
+
+            // Adiciona a classe de animação à página
+            main.classList.add('fade-out');
+
+            // Redireciona após o fim da animação
+            setTimeout(() => {
+                window.location.href = createCampaignButton.parentElement.getAttribute('href');
+            }, 500); // Correspondendo à duração da animação
+        });
+    });
+</script>
+
 
 {% endblock %}
