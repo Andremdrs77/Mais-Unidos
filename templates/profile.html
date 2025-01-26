@@ -18,7 +18,7 @@
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        width: 35%;
+        width: 40%;
         margin-right: 30px;
         padding: 2%;
         background-color: #0d2329;
@@ -34,7 +34,7 @@
     }
 
     .profile-container1 img {
-        width: 60%; /* Define um tamanho fixo apropriado */
+        width: 70%; /* Define um tamanho fixo apropriado */
         height: auto; /* Mantém as proporções */
         border-radius: 50%; /* Deixa a imagem circular */
         object-fit: cover; /* Garante que a imagem se ajuste bem ao espaço */
@@ -87,7 +87,7 @@
         gap: 10px;
         box-sizing: border-box;
         overflow: hidden; 
-}
+    }
 
     .profile-info2 {
         display: grid;
@@ -97,19 +97,26 @@
         gap: 10px;
         box-sizing: border-box;
         overflow: hidden;
-}
-
-    .info2-items {
-        width: 100%; 
-        height: 95px;
-        border: 2px solid #05664f;
-        background-color: #F9F9F9;
-        padding: 20px;
-        border-radius: 10px;
-        box-sizing: border-box;
     }
 
-        .info2-buttons {
+    .info2-items {
+        display: flex;
+        flex-direction: column; /* Organiza o conteúdo verticalmente */
+        align-items: center;    /* Centraliza horizontalmente */
+        justify-content: center; /* Centraliza verticalmente */
+        text-align: center;     /* Centraliza o texto */
+        width: 100%;
+        min-height: 120px;      /* Define uma altura mínima para todos os itens */
+        border: 2px solid #05664f;
+        background-color: #F9F9F9;
+        padding: 10px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        gap: 5px;
+    }
+
+
+    .info2-buttons {
         grid-column: span 3;
         margin-top: 10px;
         height: 85px;
@@ -118,6 +125,18 @@
         box-sizing: bord
     }
 
+    .fas {
+        display: flex; 
+        align-items: center; 
+        height: 100%;
+    }
+
+    .info2-item-text {
+        display: flex;
+        flex-direction: column;
+        font-size: small;
+        gap: 5px;
+    }
 
     @media (max-width: 768px) {
         .profile-page {
@@ -208,17 +227,82 @@
         <div class="profile-container2">
             <h1>Informações</h1>
             <div class="profile-info2">
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
-                <div class="info2-items"></div>
+                <!-- Item 1 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-hand-holding-usd" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de dinheiro doado:</p>
+                        <p>R$50,00</p>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-gift" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de itens doados:</p>
+                        <p>777 itens</p>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-bullhorn" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Item 4 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-hand-middle-finger" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de pessoas prejudicadas:</p>
+                        <p>777 milhões</p>
+                    </div>
+                </div>
+                <!-- Item 5 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-user" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Item 6 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-user" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Item 7 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-user" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Item 8 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-user" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Item 9 -->
+                <div class="info2-items">
+                    <div class="fas fa-2xl fa-user" style="color: #05664f;"></div>
+                    <div class="info2-item-text fas fa-2xl" style="color: #05664f;">
+                        <p>Total de campanhas feitas:</p>
+                        <p>777 campanhas</p>
+                    </div>
+                </div>
+                <!-- Empty Buttons Row -->
                 <div class="info2-buttons"></div>
             </div>
+            
         </div>
     </div>
 </div>
