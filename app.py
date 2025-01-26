@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, obter_conexao
+from models import User, Item, Campaign, obter_conexao
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SUPERSECRETO'
@@ -76,10 +76,48 @@ def profile():
 def campaign():
     return render_template('campaign.html')
 
-@app.route('/create-campaign')
+@app.route('/create-campaign', methods=['GET', 'POST'])
 @login_required
 def create_campaign():
+    if request.method == 'POST':
+        print("Dados recebidos:", request.form.to_dict())
+        # Obter os dados do formulário
+        title = request.form['title']
+        description = request.form['description']
+        deadline = request.form['deadline']
+        goal_type = request.form['goalType']
+        user_id = current_user.id  # ID do usuário autenticado
+
+        # Processar metas específicas
+        if goal_type == 'financial':
+            meta_value = float(request.form['financialGoal'])
+            Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
+
+        elif goal_type == 'items':
+            items = request.form.getlist('itemName[]')
+            quantities = request.form.getlist('itemQuantity[]')
+            campaign_id = Campaign.create(title, description, deadline, None, goal_type, user_id)
+
+            # Salvar itens associados
+            for item_name, quantity in zip(items, quantities):
+                Item.create(item_name, quantity, campaign_id)
+
+        elif goal_type == 'items-financial':
+            meta_value = float(request.form['financialGoal'])
+            items = request.form.getlist('itemName[]')
+            quantities = request.form.getlist('itemQuantity[]')
+            values = request.form.getlist('itemValue[]')
+            campaign_id = Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
+
+            # Salvar itens com valores associados
+            for item_name, quantity, value in zip(items, quantities, values):
+                Item.create(item_name, quantity, campaign_id, float(value))
+
+        flash('Campanha criada com sucesso!', 'success')
+        return redirect(url_for('campaign'))
+
     return render_template('create_campaign.html')
+
 
 @app.route('/donations')
 @login_required

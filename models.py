@@ -62,6 +62,22 @@ class User(UserMixin):
     @property
     def is_anonymous(self):
         return False
+    
+
+class Item:
+    @staticmethod
+    def create(name, quantity, campaign_id, value=None):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        cursor.execute(
+            """
+            INSERT INTO tb_items (itm_name, itm_qnt, itm_cam_id, itm_value) 
+            VALUES (%s, %s, %s, %s)
+            """,
+            (name, quantity, campaign_id, value)
+        )
+        conexao.commit()
+        conexao.close()
 
 
 class Campaign:
@@ -94,13 +110,15 @@ class Campaign:
         cursor = conexao.cursor()
         cursor.execute(
             """
-            INSERT INTO tb_campanhas (cam_title, cam_description, cam_deadline, cam_metaValue, cam_tipo, cam_usr_id) 
+            INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_tipo, cam_usr_id) 
             VALUES (%s, %s, %s, %s, %s, %s)
             """,
             (title, description, deadline, meta_value, tipo, usr_id)
         )
         conexao.commit()
+        campaign_id = cursor.lastrowid  # Obter o ID da campanha recém-criada
         conexao.close()
+        return campaign_id
 
     @staticmethod
     def update(campaign_id, title=None, description=None, deadline=None, meta_value=None, current_value=None, tipo=None):

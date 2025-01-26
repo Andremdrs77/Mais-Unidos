@@ -747,18 +747,18 @@
                     <span class="item-description">Logout</span>
                 </button>
             </form>
-        </div> 
+        </div>
     </nav>
 
     <header>
         <h1>Criar Campanha</h1>
         <a href="{{ url_for('profile') }}" class="profile">
             {% if current_user.is_authenticated %}
-                <p>{{ current_user.name }}</p>
-                <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="">
+            <p>{{ current_user.name }}</p>
+            <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="">
             {% else %}
-                <p>Visitante</p>
-                <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="">
+            <p>Visitante</p>
+            <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="">
             {% endif %}
         </a>
     </header>
@@ -767,7 +767,7 @@
 
         <div class="form-container">
 
-            <form id="create-campaign-form">
+            <form id="create-campaign-form" name="createCampaign" method="POST" action="{{ url_for('create_campaign') }}">
                 <div class="form-group">
                     <label for="title">Título da Campanha</label>
                     <input type="text" id="title" name="title" placeholder="Digite o título da campanha" required>
@@ -785,18 +785,34 @@
 
                     <input type="radio" name="goalType" value="items" id="items-goal">
                     <label for="items-goal">Meta de Itens</label>
+
+                    <input type="radio" name="goalType" value="items-financial" id="items-financial-goal">
+                    <label for="items-financial-goal">Meta de Itens e Financeira</label>
                 </div>
 
                 <div class="form-group" id="financial-goal-input">
-                    <input type="text" id="financial-input" name="financialGoal" placeholder="Digite a meta em R$">
+                    <input type="number" id="financial-input" name="financialGoal" placeholder="Digite a meta em R$"
+                        step="0.01" min="0">
                 </div>
 
                 <div class="form-group" id="items-goal-input" style="display: none;">
                     <div id="items-list" class="item-list">
                         <div class="item-row">
-                            <input type="text" name="itemName[]" placeholder="Nome do item">
-                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
+                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
                             <button type="button" id="add-item-button" class="add-button">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="items-financial-goal-input" style="display: none;">
+                    <div id="items-financial-list" class="item-list">
+                        <div class="item-row">
+                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01"
+                                min="0" required>
+                            <button type="button" id="add-item-financial-button" class="add-button">+</button>
                         </div>
                     </div>
                 </div>
@@ -820,26 +836,68 @@
         const itemsRadio = document.getElementById('items-goal');
         const addItemButton = document.getElementById('add-item-button');
         const itemsList = document.getElementById('items-list');
+        const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
+        const itemsFinancialRadio = document.getElementById('items-financial-goal');
+        const addItemFinancialButton = document.getElementById('add-item-financial-button');
+        const itemsFinancialList = document.getElementById('items-financial-list');
 
-        financialRadio.addEventListener('change', () => {
-            financialGoalInput.style.display = 'block';
+        // Função para esconder todas as metas
+        function hideAllGoalInputs() {
+            financialGoalInput.style.display = 'none';
             itemsGoalInput.style.display = 'none';
+            itemsFinancialGoalInput.style.display = 'none';
+        }
+
+        // Alternar exibição para meta financeira
+        financialRadio.addEventListener('change', () => {
+            console.log('Meta Financeira selecionada');
+            hideAllGoalInputs();
+            financialGoalInput.style.display = 'block';
         });
 
+        // Alternar exibição para meta de itens
         itemsRadio.addEventListener('change', () => {
-            financialGoalInput.style.display = 'none';
+            hideAllGoalInputs();
             itemsGoalInput.style.display = 'block';
         });
 
+        // Alternar exibição para meta de itens e financeira
+        itemsFinancialRadio.addEventListener('change', () => {
+            console.log('Meta de Itens e Financeira selecionada');
+            hideAllGoalInputs();
+            itemsFinancialGoalInput.style.display = 'block';
+        });
+
+        // Adicionar novos itens para meta de itens e financeira
+        addItemFinancialButton.addEventListener('click', () => {
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+
+            itemRow.innerHTML = `
+        <input type="text" name="itemName[]" placeholder="Nome do item">
+        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
+        <input type="text" name="itemValue[]" placeholder="Valor unitário (R$)">
+        <button type="button" class="remove-button">x</button>
+    `;
+
+            const removeButton = itemRow.querySelector('.remove-button');
+            removeButton.addEventListener('click', () => {
+                itemsFinancialList.removeChild(itemRow);
+            });
+
+            itemsFinancialList.appendChild(itemRow);
+        });
+
+        // Adicionar novos itens para meta de itens
         addItemButton.addEventListener('click', () => {
             const itemRow = document.createElement('div');
             itemRow.className = 'item-row';
 
             itemRow.innerHTML = `
-                <input type="text" name="itemName[]" placeholder="Nome do item">
-                <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
-                <button type="button" class="remove-button">x</button>
-            `;
+        <input type="text" name="itemName[]" placeholder="Nome do item">
+        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
+        <button type="button" class="remove-button">x</button>
+    `;
 
             const removeButton = itemRow.querySelector('.remove-button');
             removeButton.addEventListener('click', () => {
@@ -848,6 +906,7 @@
 
             itemsList.appendChild(itemRow);
         });
+
     </script>
 
     <script>
