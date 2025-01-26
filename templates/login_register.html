@@ -13,25 +13,26 @@
 
     <div class="container" id="container">
         <div class="form-container sign-up">
-            <form>
+            <form method="POST">
                 <h1>Crie Sua Conta</h1>
                 <span>Use seu e-mail para se registrar</span>
-                <input id="r_name" type="text" placeholder="Nome">
-                <input id="r_email" type="email" placeholder="E-mail">
-                <input id="r_telefone" type="telephone" placeholder="Telefone">
-                <input id="r_password" type="password" placeholder="Senha">
-                <input id="r_confirmpassword" type="password" placeholder="Cofirme sua senha">
-                <button>Registrar</button>
+                <input id="r_name" name="r_name" type="text" placeholder="Nome" required>
+                <input id="r_email" name="r_email" type="email" placeholder="E-mail" required>
+                <input id="r_telefone" name="r_telefone" type="telephone" placeholder="Telefone" required>
+                <input id="r_password" name="r_password" type="password" placeholder="Senha" required>
+                <input id="r_confirmpassword" name="r_confirmpassword" type="password" placeholder="Confirme sua senha" required>
+                <input type="hidden" name="action" value="register">
+                <button type="submit">Registrar</button>
             </form>
         </div>
         <div class="form-container sign-in">
-            <form>
+            <form method="POST">
                 <h1>Entrar</h1>
                 <span>Use seu e-mail e senha</span>
-                <input id="l_email" type="email" placeholder="E-mail">
-                <input id="l_password" type="password" placeholder="Senha">
-                <a href="#">Esqueceu sua senha?</a>
-                <button>Entrar</button>
+                <input id="l_email" name="l_email" type="email" placeholder="E-mail" required>
+                <input id="l_password" name="l_password" type="password" placeholder="Senha" required>
+                <input type="hidden" name="action" value="login">
+                <button type="submit">Entrar</button>
             </form>
         </div>
         <div class="toggle-container">

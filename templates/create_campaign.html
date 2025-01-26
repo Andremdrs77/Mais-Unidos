@@ -102,7 +102,7 @@
             }
 
             .confirm-button {
-                background-color: #ff6666;           
+                background-color: #ff6666;
                 color: white;
             }
 
@@ -152,27 +152,32 @@
             }
 
             @keyframes fadeInModal {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
 
-@keyframes fadeOutModal {
-    from {
-        opacity: 1; /* Estado final do fade-in */
-        transform: translateY(0); /* Estado final do fade-in */
-    }
-    to {
-        opacity: 0; /* Estado inicial do fade-in */
-        transform: translateY(-20px); /* Estado inicial do fade-in */
-    }
-}
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
+            @keyframes fadeOutModal {
+                from {
+                    opacity: 1;
+                    /* Estado final do fade-in */
+                    transform: translateY(0);
+                    /* Estado final do fade-in */
+                }
+
+                to {
+                    opacity: 0;
+                    /* Estado inicial do fade-in */
+                    transform: translateY(-20px);
+                    /* Estado inicial do fade-in */
+                }
+            }
         </style>
 
         <style>
@@ -278,15 +283,19 @@
             }
 
             .profile img {
-                width: 50%;
+                width: 30%;
                 border: 1px solid black;
                 border-radius: 100%;
-                margin-left: 25%;
+                margin-left: 2%;
+            }
+
+            .profile p {
+                width: 70%;
             }
 
             .profile {
-                max-width: 115px;
-                margin-right: 45px;
+                max-width: 200px;
+                margin-right: 2%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -732,20 +741,25 @@
         </div>
 
         <div id="logout">
-            <button id="logout_btn">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span class="item-description">
-                    Logout
-                </span>
-            </button>
-        </div>
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button id="logout_btn" type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Logout</span>
+                </button>
+            </form>
+        </div> 
     </nav>
 
     <header>
-        <h1>Criar campanha</h1>
-        <a href="#" class="profile">
-            <p>Neguinho da XJ</p>
-            <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="">
+        <h1>Criar Campanha</h1>
+        <a href="{{ url_for('profile') }}" class="profile">
+            {% if current_user.is_authenticated %}
+                <p>{{ current_user.name }}</p>
+                <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="">
+            {% else %}
+                <p>Visitante</p>
+                <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="">
+            {% endif %}
         </a>
     </header>
 
