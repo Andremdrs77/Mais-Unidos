@@ -62,15 +62,54 @@
         const container = document.getElementById('container');
         const registerBtn = document.getElementById('register');
         const loginBtn = document.getElementById('login');
-
+    
         registerBtn.addEventListener('click', () => {
             container.classList.add("active");
         });
-
+    
         loginBtn.addEventListener('click', () => {
             container.classList.remove("active");
         });
+    
+        const senha = document.getElementById('r_password');
+        const confirmarsenha = document.getElementById('r_confirmpassword');
+    
+        // Validação da senha
+        function validarSenhas() {
+            let mensagemErro = '';
+    
+            // Verificar tamanho da senha
+            if (senha.value.length < 8) {
+                mensagemErro = 'A senha precisa ter pelo menos 8 caracteres!';
+                senha.setCustomValidity(mensagemErro);
+                senha.classList.add('erroTamanho');
+            } else {
+                senha.setCustomValidity('');
+                senha.classList.remove('erroTamanho');
+            }
+    
+            // Verificar igualdade das senhas
+            if (confirmarsenha.value && senha.value !== confirmarsenha.value) {
+                mensagemErro = 'As senhas precisam ser iguais!';
+                confirmarsenha.setCustomValidity(mensagemErro);
+                confirmarsenha.classList.add('erroIgualdade');
+            } else {
+                confirmarsenha.setCustomValidity('');
+                confirmarsenha.classList.remove('erroIgualdade');
+            }
+        }
+    
+        senha.addEventListener('input', validarSenhas);
+        confirmarsenha.addEventListener('input', validarSenhas);
     </script>
-</body>
+    
+    <style>
+        .erroTamanho, .erroIgualdade {
+            outline: 2px solid red; 
+            border-radius: 2px;
+        }
+    </style>
+    
+</body>    
 
 </html>
