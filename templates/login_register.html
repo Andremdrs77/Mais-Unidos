@@ -74,11 +74,9 @@
         const senha = document.getElementById('r_password');
         const confirmarsenha = document.getElementById('r_confirmpassword');
     
-        // Validação da senha
         function validarSenhas() {
             let mensagemErro = '';
     
-            // Verificar tamanho da senha
             if (senha.value.length < 8) {
                 mensagemErro = 'A senha precisa ter pelo menos 8 caracteres!';
                 senha.setCustomValidity(mensagemErro);
@@ -88,7 +86,6 @@
                 senha.classList.remove('erroTamanho');
             }
     
-            // Verificar igualdade das senhas
             if (confirmarsenha.value && senha.value !== confirmarsenha.value) {
                 mensagemErro = 'As senhas precisam ser iguais!';
                 confirmarsenha.setCustomValidity(mensagemErro);
@@ -109,7 +106,7 @@
             border-radius: 2px;
         }
     </style>
-    
+
 </body>    
 
 </html>

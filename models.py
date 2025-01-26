@@ -71,7 +71,7 @@ class Item:
         cursor = conexao.cursor()
         cursor.execute(
             """
-            INSERT INTO tb_items (itm_name, itm_qnt, itm_cam_id, itm_value) 
+            INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value) 
             VALUES (%s, %s, %s, %s)
             """,
             (name, quantity, campaign_id, value)
