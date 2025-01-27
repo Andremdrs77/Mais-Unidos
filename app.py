@@ -67,27 +67,31 @@ def index():
     campaigns_data = []
 
     for campaign in campaigns:
+        # Buscar o nome do criador da campanha com base no cam_usr_id
         user = User.get(campaign.usr_id)
         user_name = user.name if user else "Usuário desconhecido"
-        progress = (campaign.current_value / campaign.meta_value) * 100 if campaign.meta_value > 0 else 0
 
-        # Usar os valores de data diretamente como strings
-        created_at = campaign.created_at if campaign.created_at else "Data não disponível"
-        deadline = campaign.deadline if campaign.deadline else "Prazo não definido"
+        # Calcular o progresso da campanha em porcentagem
+        progress = (campaign.reached_meta / campaign.meta_value * 100) if campaign.meta_value > 0 else 0
 
+        # Formatar datas
+        created_at = campaign.created_at.strftime('%d/%m/%Y %H:%M:%S') if campaign.created_at else "Data não disponível"
+        deadline = campaign.deadline.strftime('%d/%m/%Y') if campaign.deadline else "Prazo não definido"
+
+        # Adicionar dados para renderizar no template
         campaigns_data.append({
             "title": campaign.title,
             "description": campaign.description,
             "tipo": campaign.tipo,
-            "status": campaign.status,  # Adiciona o status
+            "status": campaign.status,
             "created_at": created_at,
-            "user_name": user_name,
+            "user_name": user_name,  # Nome do criador da campanha
             "deadline": deadline,
-            "meta": f"{progress:.2f}%"
+            "meta": f"{progress:.2f}%"  # Progresso formatado como porcentagem
         })
 
+    # Renderizar template com as campanhas
     return render_template('index.html', campaigns=campaigns_data)
-
 
 
 
@@ -112,15 +116,18 @@ def create_campaign():
         description = request.form['description']
         deadline = request.form['deadline']
         goal_type = request.form['goalType']
-        user_id = current_user.id  # ID do usuário autenticado
+        user_id = current_user.id  # ID do usuário autenticado]
+
 
         # Processar metas específicas
         if goal_type == 'financial':
+            goal_type = 'Financeiro'
             meta_value = float(request.form['financialGoal'])
             Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
 
         elif goal_type == 'items':
             # Obter os valores dos itens do formulário
+            goal_type = 'Itens'
             items = request.form.getlist('itemName[]')
             quantities = request.form.getlist('itemQuantity[]')
             meta_value = sum(int(quantity) for quantity in quantities)
@@ -134,6 +141,7 @@ def create_campaign():
                 
         elif goal_type == 'items-financial':
             # Obter os valores dos itens do formulário
+            goal_type = 'Itens e Financeiro'
             items = request.form.getlist('itemName[]')
             quantities = request.form.getlist('itemQuantity[]')
             values = request.form.getlist('itemValue[]')

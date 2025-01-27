@@ -81,24 +81,25 @@ class Item:
 
 
 class Campaign:
-    def __init__(self, id, title, description, deadline, meta_value, current_value, tipo, created_at, deleted_at, usr_id, status):
+    def __init__(self, id, title, description, deadline, meta_value, reached_meta, tipo, status, created_at, deleted_at, usr_id):
         self.id = id
         self.title = title
         self.description = description
         self.deadline = deadline
         self.meta_value = meta_value
-        self.current_value = current_value
+        self.reached_meta = reached_meta
         self.tipo = tipo
+        self.status = status
         self.created_at = created_at
         self.deleted_at = deleted_at
         self.usr_id = usr_id
-        self.status = status  # Adicionado o campo status]
+
 
     @staticmethod
     def get(campaign_id):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        cursor.execute("SELECT * FROM    WHERE cam_id = %s", (campaign_id,))
+        cursor.execute("SELECT * FROM tb_campaigns WHERE cam_id = %s", (campaign_id,))
         result = cursor.fetchone()
         conexao.close()
         if result:
@@ -122,7 +123,7 @@ class Campaign:
         return campaign_id
 
     @staticmethod
-    def update(campaign_id, title=None, description=None, deadline=None, meta_value=None, current_value=None, tipo=None):
+    def update(campaign_id, title=None, description=None, deadline=None, meta_value=None, reached_meta=None, tipo=None, status=None):
         conexao = obter_conexao()
         cursor = conexao.cursor()
 
@@ -138,15 +139,18 @@ class Campaign:
         if deadline:
             updates.append("cam_deadline = %s")
             values.append(deadline)
-        if meta_value:
-            updates.append("cam_metaValue = %s")
+        if meta_value is not None:
+            updates.append("cam_meta = %s")
             values.append(meta_value)
-        if current_value is not None:
-            updates.append("cam_currentValue = %s")
-            values.append(current_value)
+        if reached_meta is not None:
+            updates.append("cam_reachedMeta = %s")
+            values.append(reached_meta)
         if tipo:
             updates.append("cam_tipo = %s")
             values.append(tipo)
+        if status:
+            updates.append("cam_status = %s")
+            values.append(status)
 
         if updates:
             query = f"UPDATE tb_campaigns SET {', '.join(updates)} WHERE cam_id = %s"
@@ -170,8 +174,17 @@ class Campaign:
         cursor.execute("SELECT * FROM tb_campaigns")
         results = cursor.fetchall()
         conexao.close()
-        return [Campaign(*row) for row in results]
+
+        return [
+            Campaign(
+                cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            )
+            for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
+        ]
+
 
 
     def is_active(self):
-        return self.deleted_at is None
+        return self.status == "ativa"
