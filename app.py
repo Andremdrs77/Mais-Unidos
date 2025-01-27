@@ -63,7 +63,33 @@ def login_and_register():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    campaigns = Campaign.get_all()
+    campaigns_data = []
+
+    for campaign in campaigns:
+        user = User.get(campaign.usr_id)
+        user_name = user.name if user else "Usuário desconhecido"
+        progress = (campaign.current_value / campaign.meta_value) * 100 if campaign.meta_value > 0 else 0
+
+        # Usar os valores de data diretamente como strings
+        created_at = campaign.created_at if campaign.created_at else "Data não disponível"
+        deadline = campaign.deadline if campaign.deadline else "Prazo não definido"
+
+        campaigns_data.append({
+            "title": campaign.title,
+            "description": campaign.description,
+            "tipo": campaign.tipo,
+            "status": campaign.status,  # Adiciona o status
+            "created_at": created_at,
+            "user_name": user_name,
+            "deadline": deadline,
+            "meta": f"{progress:.2f}%"
+        })
+
+    return render_template('index.html', campaigns=campaigns_data)
+
+
+
 
 @app.route('/profile')
 @login_required

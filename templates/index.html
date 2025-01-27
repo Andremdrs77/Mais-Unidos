@@ -229,62 +229,27 @@
 </div>
 
 <div id="campaign-container" class="campaign-container">
-    <!-- Exemplo de card de campanha -->
+    {% for campaign in campaigns %}
     <div class="campaign-card">
-        <h3>Título da Campanha</h3>
-        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
-        <p><strong>Meta:</strong> R$ 10.000</p>
-        <p><strong>Prazo:</strong> 30/01/2025</p>
-        <p><strong>Status:</strong> Ativa</p>
+        <h3>{{ campaign.title }}</h3>
+        <p><strong>Descrição:</strong> {{ campaign.description }}</p>
+        <p><strong>Tipo:</strong> {{ campaign.tipo }}</p>
+        <p><strong>Status:</strong> {{ campaign.status }}</p>
+        <p><strong>Criado em:</strong> {{ campaign.created_at }}</p>
+        <p><strong>Criador:</strong> {{ campaign.user_name }}</p>
+        <p><strong>Prazo:</strong> {{ campaign.deadline }}</p>
+        <p><strong>Progresso:</strong></p>
         <div class="progress-bar">
-            <div class="progress" style="width: 70%;">70%</div>
+            <div id="progress" class="progress" style="width: {{ campaign.meta }};">{{ campaign.meta }}</div>
         </div>
         <button class="donate-button">Doar</button>
     </div>
-
-    <!-- Exemplo de card de campanha -->
-    <div class="campaign-card">
-        <h3>Título da Campanha</h3>
-        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
-        <p><strong>Meta:</strong> R$ 10.000</p>
-        <p><strong>Prazo:</strong> 30/01/2025</p>
-        <p><strong>Status:</strong> Ativa</p>
-        <div class="progress-bar">
-            <div class="progress" style="width: 70%;">70%</div>
-        </div>
-        <button class="donate-button">Doar</button>
-    </div>
-
-    <!-- Exemplo de card de campanha -->
-    <div class="campaign-card">
-        <h3>Título da Campanha</h3>
-        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
-        <p><strong>Meta:</strong> R$ 10.000</p>
-        <p><strong>Prazo:</strong> 30/01/2025</p>
-        <p><strong>Status:</strong> Ativa</p>
-        <div class="progress-bar">
-            <div class="progress" style="width: 70%;">70%</div>
-        </div>
-        <button class="donate-button">Doar</button>
-    </div>
-
-    <!-- Exemplo de card de campanha -->
-    <div class="campaign-card">
-        <h3>Título da Campanha</h3>
-        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
-        <p><strong>Meta:</strong> R$ 10.000</p>
-        <p><strong>Prazo:</strong> 30/01/2025</p>
-        <p><strong>Status:</strong> Ativa</p>
-        <div class="progress-bar">
-            <div class="progress" style="width: 70%;">70%</div>
-        </div>
-        <button class="donate-button">Doar</button>
-    </div>
-
-    <!-- Repita os cards para cada campanha -->
+    {% endfor %}
 </div>
 
+
 <script>
+
     document.getElementById('top-campaigns').addEventListener('click', function () {
         document.getElementById('period-dropdown').style.display = 'block';
         this.classList.add('active');

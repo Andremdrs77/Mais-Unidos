@@ -81,7 +81,7 @@ class Item:
 
 
 class Campaign:
-    def __init__(self, id, title, description, deadline, meta_value, current_value, tipo, created_at, deleted_at, usr_id):
+    def __init__(self, id, title, description, deadline, meta_value, current_value, tipo, created_at, deleted_at, usr_id, status):
         self.id = id
         self.title = title
         self.description = description
@@ -92,12 +92,13 @@ class Campaign:
         self.created_at = created_at
         self.deleted_at = deleted_at
         self.usr_id = usr_id
+        self.status = status  # Adicionado o campo status]
 
     @staticmethod
     def get(campaign_id):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        cursor.execute("SELECT * FROM tb_campanhas WHERE cam_id = %s", (campaign_id,))
+        cursor.execute("SELECT * FROM    WHERE cam_id = %s", (campaign_id,))
         result = cursor.fetchone()
         conexao.close()
         if result:
@@ -148,7 +149,7 @@ class Campaign:
             values.append(tipo)
 
         if updates:
-            query = f"UPDATE tb_campanhas SET {', '.join(updates)} WHERE cam_id = %s"
+            query = f"UPDATE tb_campaigns SET {', '.join(updates)} WHERE cam_id = %s"
             values.append(campaign_id)
             cursor.execute(query, tuple(values))
             conexao.commit()
@@ -158,7 +159,7 @@ class Campaign:
     def delete(campaign_id):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        cursor.execute("DELETE FROM tb_campanhas WHERE cam_id = %s", (campaign_id,))
+        cursor.execute("DELETE FROM tb_campaigns WHERE cam_id = %s", (campaign_id,))
         conexao.commit()
         conexao.close()
 
@@ -166,10 +167,11 @@ class Campaign:
     def get_all():
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        cursor.execute("SELECT * FROM tb_campanhas")
+        cursor.execute("SELECT * FROM tb_campaigns")
         results = cursor.fetchall()
         conexao.close()
         return [Campaign(*row) for row in results]
+
 
     def is_active(self):
         return self.deleted_at is None
