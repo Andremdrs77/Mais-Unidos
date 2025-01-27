@@ -830,82 +830,95 @@
     </main>
 
     <script>
-        const financialGoalInput = document.getElementById('financial-goal-input');
-        const itemsGoalInput = document.getElementById('items-goal-input');
-        const financialRadio = document.getElementById('financial-goal');
-        const itemsRadio = document.getElementById('items-goal');
-        const addItemButton = document.getElementById('add-item-button');
-        const itemsList = document.getElementById('items-list');
-        const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
-        const itemsFinancialRadio = document.getElementById('items-financial-goal');
-        const addItemFinancialButton = document.getElementById('add-item-financial-button');
-        const itemsFinancialList = document.getElementById('items-financial-list');
+document.addEventListener('DOMContentLoaded', () => {
+    const financialGoalInput = document.getElementById('financial-goal-input');
+    const itemsGoalInput = document.getElementById('items-goal-input');
+    const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
+    const financialRadio = document.getElementById('financial-goal');
+    const itemsRadio = document.getElementById('items-goal');
+    const itemsFinancialRadio = document.getElementById('items-financial-goal');
+    const addItemButton = document.getElementById('add-item-button');
+    const itemsList = document.getElementById('items-list');
+    const addItemFinancialButton = document.getElementById('add-item-financial-button');
+    const itemsFinancialList = document.getElementById('items-financial-list');
 
-        // Função para esconder todas as metas
-        function hideAllGoalInputs() {
-            financialGoalInput.style.display = 'none';
-            itemsGoalInput.style.display = 'none';
-            itemsFinancialGoalInput.style.display = 'none';
-        }
+    // Função para esconder e desativar todos os inputs de metas
+    function hideAllGoalInputs() {
+        // Esconder todos os grupos de inputs
+        financialGoalInput.style.display = 'none';
+        itemsGoalInput.style.display = 'none';
+        itemsFinancialGoalInput.style.display = 'none';
 
-        // Alternar exibição para meta financeira
-        financialRadio.addEventListener('change', () => {
-            console.log('Meta Financeira selecionada');
-            hideAllGoalInputs();
-            financialGoalInput.style.display = 'block';
+        // Desativar inputs de todas as metas
+        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+    }
+
+    // Alternar para meta financeira
+    financialRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        financialGoalInput.style.display = 'block';
+        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Alternar para meta de itens
+    itemsRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        itemsGoalInput.style.display = 'block';
+        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Alternar para meta de itens e financeira
+    itemsFinancialRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        itemsFinancialGoalInput.style.display = 'block';
+        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Adicionar novos itens para meta de itens
+    addItemButton.addEventListener('click', () => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item-row';
+
+        itemRow.innerHTML = `
+            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+            <button type="button" class="remove-button">x</button>
+        `;
+
+        const removeButton = itemRow.querySelector('.remove-button');
+        removeButton.addEventListener('click', () => {
+            itemsList.removeChild(itemRow);
         });
 
-        // Alternar exibição para meta de itens
-        itemsRadio.addEventListener('change', () => {
-            hideAllGoalInputs();
-            itemsGoalInput.style.display = 'block';
+        itemsList.appendChild(itemRow);
+    });
+
+    // Adicionar novos itens para meta de itens e financeira
+    addItemFinancialButton.addEventListener('click', () => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item-row';
+
+        itemRow.innerHTML = `
+            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" required>
+            <button type="button" class="remove-button">x</button>
+        `;
+
+        const removeButton = itemRow.querySelector('.remove-button');
+        removeButton.addEventListener('click', () => {
+            itemsFinancialList.removeChild(itemRow);
         });
 
-        // Alternar exibição para meta de itens e financeira
-        itemsFinancialRadio.addEventListener('change', () => {
-            console.log('Meta de Itens e Financeira selecionada');
-            hideAllGoalInputs();
-            itemsFinancialGoalInput.style.display = 'block';
-        });
+        itemsFinancialList.appendChild(itemRow);
+    });
 
-        // Adicionar novos itens para meta de itens e financeira
-        addItemFinancialButton.addEventListener('click', () => {
-            const itemRow = document.createElement('div');
-            itemRow.className = 'item-row';
+    // Inicializar estado padrão (meta financeira ativa)
+    financialRadio.dispatchEvent(new Event('change'));
+});
 
-            itemRow.innerHTML = `
-        <input type="text" name="itemName[]" placeholder="Nome do item">
-        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
-        <input type="text" name="itemValue[]" placeholder="Valor unitário (R$)">
-        <button type="button" class="remove-button">x</button>
-    `;
-
-            const removeButton = itemRow.querySelector('.remove-button');
-            removeButton.addEventListener('click', () => {
-                itemsFinancialList.removeChild(itemRow);
-            });
-
-            itemsFinancialList.appendChild(itemRow);
-        });
-
-        // Adicionar novos itens para meta de itens
-        addItemButton.addEventListener('click', () => {
-            const itemRow = document.createElement('div');
-            itemRow.className = 'item-row';
-
-            itemRow.innerHTML = `
-        <input type="text" name="itemName[]" placeholder="Nome do item">
-        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1">
-        <button type="button" class="remove-button">x</button>
-    `;
-
-            const removeButton = itemRow.querySelector('.remove-button');
-            removeButton.addEventListener('click', () => {
-                itemsList.removeChild(itemRow);
-            });
-
-            itemsList.appendChild(itemRow);
-        });
 
     </script>
 

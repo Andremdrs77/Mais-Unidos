@@ -94,24 +94,31 @@ def create_campaign():
             Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
 
         elif goal_type == 'items':
+            # Obter os valores dos itens do formulário
             items = request.form.getlist('itemName[]')
             quantities = request.form.getlist('itemQuantity[]')
-            campaign_id = Campaign.create(title, description, deadline, None, goal_type, user_id)
+            meta_value = sum(int(quantity) for quantity in quantities)
 
-            # Salvar itens associados
+            # Criar a campanha
+            campaign_id = Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
+
+            # Salvar os itens associados
             for item_name, quantity in zip(items, quantities):
-                Item.create(item_name, quantity, campaign_id)
-
+                Item.create(item_name, int(quantity), campaign_id)
+                
         elif goal_type == 'items-financial':
-            meta_value = float(request.form['financialGoal'])
+            # Obter os valores dos itens do formulário
             items = request.form.getlist('itemName[]')
             quantities = request.form.getlist('itemQuantity[]')
             values = request.form.getlist('itemValue[]')
+            meta_value = sum(float(quantity) * float(value) for quantity, value in zip(quantities, values))
+
+            # Criar a campanha
             campaign_id = Campaign.create(title, description, deadline, meta_value, goal_type, user_id)
 
-            # Salvar itens com valores associados
+            # Salvar os itens associados
             for item_name, quantity, value in zip(items, quantities, values):
-                Item.create(item_name, quantity, campaign_id, float(value))
+                Item.create(item_name, int(quantity), campaign_id, float(value))
 
         flash('Campanha criada com sucesso!', 'success')
         return redirect(url_for('campaign'))
