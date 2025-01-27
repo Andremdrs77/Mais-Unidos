@@ -238,12 +238,15 @@
         <p><strong>Criado em:</strong> {{ campaign.created_at }}</p>
         <p><strong>Criador:</strong> {{ campaign.user_name }}</p>
         <p><strong>Prazo:</strong> {{ campaign.deadline }}</p>
+        <p><strong>Meta:</strong> {{ campaign.meta }}</p>
         <p><strong>Progresso:</strong></p>
         <div class="progress-bar">
-            <div id="progress" class="progress" style="width: {{ campaign.meta }};">{{ campaign.meta }}</div>
+            <div id="progress" class="progress" style="width: {{ campaign.progress }}%;">{{ campaign.progress }}%</div>
         </div>
-        <button class="donate-button">Doar</button>
-    </div>
+        <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
+            <button class="donate-button">Doar</button>
+        </a>
+    </div>    
     {% endfor %}
 </div>
 

@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %} Doação {% endblock %}
+
+{% block titlePage %} Realizar Doação {% endblock %}
+
+{% block style %}
+<style>
+    /* Estilos gerais */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2,
+    h3 {
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    p {
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .list-group {
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .list-group-item {
+        padding: 10px 15px;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .list-group-item:not(:last-child) {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn:hover {
+        transform: scale(1.02);
+    }
+
+    .btn-primary {
+        background-color: #05664f;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #044f3b;
+    }
+
+    .btn-outline-primary {
+        background-color: white;
+        border: 2px solid #05664f;
+        color: #05664f;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #05664f;
+        color: white;
+    }
+
+    .form-select,
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        outline: none;
+        border-color: #05664f;
+        box-shadow: 0 0 5px rgba(5, 102, 79, 0.3);
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .form-select,
+        .form-control {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if campaign.status == "Concluída" %}
+<div class="alert alert-success">
+    A campanha atingiu a meta, mas você ainda pode contribuir. Toda contribuição será considerada como bônus!
+</div>
+{% endif %}
+
+<h2>Faça uma doação para "{{ campaign.title }}"</h2>
+<p><strong>Descrição:</strong> {{ campaign.description }}</p>
+
+<!-- Exibir meta de arrecadação -->
+{% if campaign.tipo in ["Itens", "Itens e Financeiro"] %}
+<h3>Meta de Itens:</h3>
+<ul class="list-group mb-4">
+    {% for item in items %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ item.name }}
+        <span class="badge bg-secondary">
+            Meta: {{ item.quantity }} | Arrecadado: {{ item.reached_quantity }}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if campaign.tipo in ["Financeiro", "Itens e Financeiro"] %}
+<div class="alert alert-info">
+    <p><strong>Meta financeira:</strong> R$ {{ campaign.meta_value }}</p>
+    <p><strong>Arrecadado até agora:</strong> R$ {{ campaign.reached_meta }}</p>
+</div>
+{% endif %}
+
+<form action="/process_donation" method="post">
+    <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
+
+    <!-- Formulário de doação financeira -->
+    {% if campaign.tipo in ["Financeiro", "Itens e Financeiro"] %}
+    <div class="form-section">
+        <h3>Contribuir com valor</h3>
+        <label for="donation_value" class="form-label">Digite o valor:</label>
+        <input type="number" class="form-control" name="donation_value" min="1" placeholder="Ex.: 100" />
+    </div>
+    {% endif %}
+
+    <!-- Formulário de doação de itens -->
+    {% if campaign.tipo in ["Itens", "Itens e Financeiro"] %}
+    <div class="form-section">
+        <h3>Contribuir com itens</h3>
+        <label for="item_id" class="form-label">Selecione o item:</label>
+        <select name="item_id" class="form-select">
+            {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }} (Meta: {{ item.quantity }}, Arrecadado: {{ item.reached_quantity }})</option>
+            {% endfor %}
+        </select>
+
+        <label for="item_quantity" class="form-label">Quantidade:</label>
+        <input type="number" class="form-control" name="item_quantity" min="1" placeholder="Ex.: 5" />
+    </div>
+    {% endif %}
+
+    <!-- Botão de envio -->
+    <button type="submit" class="btn btn-primary">Contribuir</button>
+</form>
+{% endblock %}

@@ -66,18 +66,51 @@ class User(UserMixin):
 
 class Item:
     @staticmethod
-    def create(name, quantity, campaign_id, value=None):
+    def get_by_campaign(campaign_id):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        cursor.execute(
-            """
-            INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value) 
-            VALUES (%s, %s, %s, %s)
-            """,
-            (name, quantity, campaign_id, value)
-        )
+        cursor.execute("SELECT itm_id, itm_name, itm_quantity, itm_reachedQuantity, itm_value FROM tb_items WHERE itm_cam_id = %s", (campaign_id,))
+        results = cursor.fetchall()
+        conexao.close()
+
+        items = []
+        for row in results:
+            items.append({
+                "id": row[0],
+                "name": row[1],
+                "quantity": row[2],
+                "reached_quantity": row[3],
+                "value": row[4]
+            })
+        return items
+
+
+    @staticmethod
+    def get(item_id):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT itm_id, itm_name, itm_quantity, itm_reachedQuantity, itm_value, itm_cam_id FROM tb_items WHERE itm_id = %s", (item_id,))
+        result = cursor.fetchone()
+        conexao.close()
+        if result:
+            return {
+                "id": result[0],
+                "name": result[1],
+                "quantity": result[2],
+                "reached_quantity": result[3],
+                "value": result[4],
+                "campaign_id": result[5]
+            }
+        return None
+
+    @staticmethod
+    def update_quantity(item_id, new_quantity):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        cursor.execute("UPDATE tb_items SET itm_reachedQuantity = %s WHERE itm_id = %s", (new_quantity, item_id))
         conexao.commit()
         conexao.close()
+
 
 
 class Campaign:

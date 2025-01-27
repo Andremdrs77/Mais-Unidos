@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='/images/favicon.png') }}">
+    <title>Editar campanha</title>
+
+    <!DOCTYPE html>
+    <html lang="pt-br">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+            integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='/images/favicon.png') }}">
+        <title>Editar campanha</title>
+
+        <style>
+            /* Adicione aqui o estilo do pop-up */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.6);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .modal.active {
+                display: flex;
+            }
+
+            .modal-content {
+                display: flex;
+                align-items: center;
+                justify-content: space-evenly;
+                flex-direction: column;
+                background-color: #ffffff;
+                width: 90%;
+                max-width: 400px;
+                height: 90%;
+                max-height: 400px;
+                padding: 20px;
+                border-radius: 20px;
+                text-align: center;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                animation: fadeInModal 0.4s;
+                position: relative;
+            }
+
+            .modal-content i {
+                font-size: 50px;
+                color: #05664f;
+                margin-bottom: 10px;
+            }
+
+            @keyframes fadeInModal {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .modal-buttons {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 20px;
+            }
+
+            .modal-buttons button {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin: 0px 10px;
+            }
+
+            .cancel-button {
+                background-color: #05664f;
+                color: white;
+            }
+
+            .cancel-button:hover {
+                background-color: #044f3b;
+            }
+
+            .confirm-button {
+                background-color: #ff6666;
+                color: white;
+            }
+
+            .confirm-button:hover {
+                background-color: #cc3333;
+            }
+
+            @media (max-width: 768px) {
+                .modal-content {
+                    width: 95%;
+                    height: auto;
+                    max-height: 80%;
+                    padding: 15px;
+                }
+
+                .modal-content i {
+                    font-size: 40px;
+                }
+
+                .modal-buttons {
+                    flex-direction: row;
+                    gap: 10px;
+                }
+
+            }
+
+            /* Animação de fade-out para o modal */
+            .modal.fade-out {
+                animation: fadeOutModal 0.4s forwards;
+            }
+
+            @keyframes fadeOutModal {
+                from {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: scale(0.9);
+                }
+            }
+
+            /* Animação de fade-out para a página */
+            .page.fade-out {
+                animation: fadeOutPage 0.5s forwards;
+            }
+
+            @keyframes fadeInModal {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeOutModal {
+                from {
+                    opacity: 1;
+                    /* Estado final do fade-in */
+                    transform: translateY(0);
+                    /* Estado final do fade-in */
+                }
+
+                to {
+                    opacity: 0;
+                    /* Estado inicial do fade-in */
+                    transform: translateY(-20px);
+                    /* Estado inicial do fade-in */
+                }
+            }
+        </style>
+
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+            /* Nova animação para o botão (efeito de pulso) */
+            .side-item.animated-active {
+                animation: buttonPulse 0.4s forwards;
+            }
+
+            @keyframes buttonPulse {
+                0% {
+                    transform: scale(1);
+                    background-color: #e3e9f7;
+                    /* Cor inicial */
+                }
+
+                50% {
+                    transform: scale(1.1);
+                    /* Efeito de zoom */
+                    background-color: #35525a;
+                    /* Cor intermediária */
+                }
+
+                100% {
+                    transform: scale(1);
+                    /* Volta ao tamanho original */
+                    background-color: #0d2329;
+                    /* Cor final */
+                }
+            }
+
+            /* Animação de entrada */
+            .fade-in {
+                animation: fadeIn 0.5s forwards;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Animação de saída */
+            .fade-out {
+                animation: fadeOut 0.5s forwards;
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+            }
+
+
+            header h1 {
+                padding-left: 25px;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            body {
+                display: flex;
+                min-height: 100vh;
+                background-color: #0d2329;
+                background: linear-gradient(to right, #05664f, #0d2329);
+                padding-left: 82px;
+                color: #0d2329;
+            }
+
+            header {
+                background-color: #ffffff;
+                width: 100%;
+                padding: 24px;
+                padding-left: 100px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 998;
+                /* Fica abaixo da sidebar */
+                max-height: 96px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 4px 10px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .profile img {
+                width: 30%;
+                border: 1px solid black;
+                border-radius: 100%;
+                margin-left: 2%;
+            }
+
+            .profile p {
+                width: 70%;
+            }
+
+            .profile {
+                max-width: 200px;
+                margin-right: 2%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: #0d2329;
+            }
+
+            main {
+                margin-top: 114px;
+                /* Espaço abaixo do header */
+                margin-left: 18px;
+                margin-right: 18px;
+                margin-bottom: 18px;
+                border-radius: 25px;
+                width: calc(100% - 36px);
+                padding: 30px;
+                background-color: white;
+                box-sizing: border-box;
+                position: relative;
+                /* Fica abaixo da sidebar */
+                z-index: 997;
+                opacity: 95%;
+                color: black;
+            }
+
+            #sidebar {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                background-color: #ffffff;
+                height: 100vh;
+                width: 82px;
+                /* Largura inicial */
+                position: fixed;
+                /* Fixa a sidebar na tela */
+                top: 0;
+                left: 0;
+                z-index: 999;
+                /* Fica acima do conteúdo */
+                transition: all .5s;
+                box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+                /* Sombra na lateral direita */
+            }
+
+            #sidebar_content {
+                padding: 12px;
+            }
+
+            #user {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 24px;
+                margin-top: 8px;
+            }
+
+            #user_avatar {
+                width: 55px;
+                height: 55px;
+                object-fit: cover;
+                border-radius: 20px;
+            }
+
+            #user_infos {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user_infos span:last-child {
+                color: #6b6b6b;
+                font-size: 12px;
+            }
+
+            #side_items {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                list-style: none;
+            }
+
+            .side-item {
+                border-radius: 8px;
+                padding: 14px;
+                cursor: pointer;
+            }
+
+            .side-item.active {
+                background-color: #0d2329;
+            }
+
+            .side-item:hover:not(.active),
+            #logout_btn:hover {
+                background-color: #e3e9f7;
+            }
+
+            .side-item a {
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #0d2329;
+            }
+
+            .side-item.active a {
+                background-color: transparent;
+                /* Mantém o fundo transparente */
+                color: #e3e9f7;
+                /* Define o texto e o ícone como branco */
+                border: none;
+                /* Remove bordas extras */
+            }
+
+            .side-item.animated-active a {
+                background-color: transparent;
+                /* Certifica-se de que o fundo não seja alterado durante a animação */
+                color: #e3e9f7;
+                /* Garante a cor branca para o texto e o ícone */
+            }
+
+            .side-item a i {
+                background: none;
+                /* Garante que o ícone não tenha fundo inesperado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                color: inherit;
+                /* Herda a cor definida */
+            }
+
+            #logout {
+                border-top: 1px solid #e3e9f7;
+                padding: 12px;
+            }
+
+            #logout_btn {
+                border: none;
+                gap: 20px;
+                padding: 12px;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                cursor: pointer;
+                background-color: transparent;
+            }
+
+            #open_btn {
+                position: absolute;
+                top: 38px;
+                right: -10px;
+                background-color: #0d2329;
+                color: #e3e9f7;
+                border-radius: 100%;
+                width: 20px;
+                height: 20px;
+                border: none;
+                cursor: pointer;
+            }
+
+            #open_btn_icon {
+                transition: transform .3s ease;
+            }
+
+            .open-sidebar #open_btn_icon {
+                transform: rotate(180deg);
+            }
+
+            .item-description {
+                width: 0px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: 14px;
+                transition: width .6s;
+                height: 0px;
+            }
+
+            #sidebar.open-sidebar {
+                width: 250px;
+                /* Largura quando expandida */
+            }
+
+            #sidebar.open-sidebar .item-description {
+                width: 150px;
+                height: auto;
+            }
+
+            #sidebar.open-sidebar .side-item a {
+                justify-content: flex-start;
+                gap: 14px;
+            }
+
+            /* Sidebar e botão de abertura para dispositivos móveis */
+            @media (max-width: 768px) {
+                #sidebar {
+                    transform: translateX(-100%);
+                    /* Move a sidebar para fora da tela */
+                    width: 250px;
+                    /* Define a largura expandida */
+                    transition: transform 0.3s ease;
+                    /* Adiciona uma transição suave */
+                }
+
+                #sidebar.open-sidebar {
+                    transform: translateX(0);
+                    /* Exibe a sidebar ao abrir */
+                }
+
+                header {
+                    padding-left: 10px;
+                }
+
+                main {
+                    width: 100%;
+                }
+
+                body {
+                    padding: 0;
+                }
+
+                h1 {
+                    font-size: 25px;
+                }
+
+                .profile p {
+                    display: none;
+                }
+
+                .profile {
+                    margin: 0;
+                }
+            }
+        </style>
+
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+            body.modal-open {
+                overflow: hidden;
+            }
+
+            .form-container label {
+                display: block;
+                margin: 10px 0 5px;
+                font-weight: 500;
+                color: #333;
+            }
+
+            .form-container input,
+            .form-container textarea {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            .form-container textarea {
+                resize: vertical;
+            }
+
+            .form-group {
+                flex: 1 1 calc(50% - 20px);
+            }
+
+            .radio-group {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 20px;
+                padding: 5px 0;
+            }
+
+            .radio-group label {
+                font-size: 16px;
+                font-weight: 600;
+                color: #05664f;
+                padding-bottom: 3px;
+                position: relative;
+                cursor: pointer;
+                text-transform: uppercase;
+            }
+
+            .radio-group label:after {
+                content: '';
+                display: block;
+                width: 0%;
+                height: 2px;
+                background-color: #05664f;
+                transition: width 0.3s;
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+            }
+
+            .radio-group input {
+                display: none;
+            }
+
+            .radio-group input:checked+label {
+                color: #333;
+            }
+
+            .radio-group input:checked+label:after {
+                width: 100%;
+            }
+
+            .item-list {
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .item-row {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+
+            .item-row input {
+                flex: 1;
+            }
+
+            .item-row .add-button,
+            .item-row .remove-button {
+                height: 100%;
+                background-color: #05664f;
+                color: #fff;
+                border: none;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                cursor: pointer;
+                margin-bottom: 15px;
+            }
+
+            .item-row .add-button:hover {
+                background-color: #044f3b;
+            }
+
+            .item-row .remove-button {
+                background-color: #ff6666;
+            }
+
+            .item-row .remove-button:hover {
+                background-color: #cc3333;
+            }
+
+            .submit-button {
+                padding: 10px 20px;
+                background-color: #0d2329;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                flex: 1 1 100%;
+            }
+
+            .submit-button:hover {
+                background-color: #08161a;
+            }
+        </style>
+
+    </head>
+
+<body>
+    <div class="modal" id="exit-modal">
+        <div class="modal-content">
+            <i class="fa-solid fa-exclamation-circle"></i>
+            <p>Você está prestes a sair desta página. Todas as informações preenchidas serão descartadas. Deseja
+                continuar?</p>
+            <div class="modal-buttons">
+                <button class="cancel-button" id="cancel-exit">Cancelar</button>
+                <button class="confirm-button" id="confirm-exit">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="user">
+                <img src="{{ url_for('static', filename='images/logoAnimada.gif') }}" id="user_avatar" alt="Avatar">
+            </div>
+
+            <ul id="side_items">
+                <li class="side-item {% if request.endpoint == 'index' %}active{% endif %}">
+                    <a href="{{ url_for('index') }}">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">
+                            Dashboard
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item {% if request.endpoint == 'profile' %}active{% endif %}">
+                    <a href="{{ url_for('profile') }}">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="item-description">
+                            Perfil
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item {% if request.endpoint == 'campaign' %}active{% endif %}">
+                    <a href="{{ url_for('campaign') }}">
+                        <i class="fa-solid fa-bullhorn"></i>
+                        <span class="item-description">
+                            Minhas campanhas
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item {% if request.endpoint == 'donations' %}active{% endif %}">
+                    <a href="{{ url_for('donations') }}">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                        <span class="item-description">
+                            Minhas doações
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <a href="{{ url_for('settings') }}">
+                        <i class="fa-solid fa-gear"></i>
+                        <span class="item-description">
+                            Configurações
+                        </span>
+                    </a>
+                </li>
+            </ul>
+
+            <button id="open_btn">
+                <i id="open_btn_icon" class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div id="logout">
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button id="logout_btn" type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Logout</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <header>
+        <h1>Editar campanha</h1>
+        <a href="{{ url_for('profile') }}" class="profile">
+            {% if current_user.is_authenticated %}
+            <p>{{ current_user.name }}</p>
+            <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="">
+            {% else %}
+            <p>Visitante</p>
+            <img src="{{ url_for('static', filename='images/default-avatar.jpg') }}" alt="">
+            {% endif %}
+        </a>
+    </header>
+
+    <main class="fade-in">
+
+        <div class="form-container">
+
+            <form id="create-campaign-form" name="createCampaign" method="POST" action="{{ url_for('create_campaign') }}">
+                <div class="form-group">
+                    <label for="title">Título da Campanha</label>
+                    <input type="text" id="title" name="title" placeholder="Digite o título da campanha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" name="description" placeholder="Digite a descrição da campanha"
+                        required></textarea>
+                </div>
+
+                <div class="radio-group">
+                    <input type="radio" name="goalType" value="financial" id="financial-goal" checked required>
+                    <label for="financial-goal">Meta Financeira</label>
+
+                    <input type="radio" name="goalType" value="items" id="items-goal">
+                    <label for="items-goal">Meta de Itens</label>
+
+                    <input type="radio" name="goalType" value="items-financial" id="items-financial-goal">
+                    <label for="items-financial-goal">Meta de Itens e Financeira</label>
+                </div>
+
+                <div class="form-group" id="financial-goal-input">
+                    <input type="number" id="financial-input" name="financialGoal" placeholder="Digite a meta em R$"
+                        step="0.01" min="0">
+                </div>
+
+                <div class="form-group" id="items-goal-input" style="display: none;">
+                    <div id="items-list" class="item-list">
+                        <div class="item-row">
+                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                            <button type="button" id="add-item-button" class="add-button">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="items-financial-goal-input" style="display: none;">
+                    <div id="items-financial-list" class="item-list">
+                        <div class="item-row">
+                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01"
+                                min="0" required>
+                            <button type="button" id="add-item-financial-button" class="add-button">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline">Prazo</label>
+                    <input type="date" id="deadline" name="deadline" required>
+                </div>
+
+                <button type="submit" class="submit-button">Editar campanha</button>
+            </form>
+        </div>
+
+
+    </main>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const financialGoalInput = document.getElementById('financial-goal-input');
+    const itemsGoalInput = document.getElementById('items-goal-input');
+    const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
+    const financialRadio = document.getElementById('financial-goal');
+    const itemsRadio = document.getElementById('items-goal');
+    const itemsFinancialRadio = document.getElementById('items-financial-goal');
+    const addItemButton = document.getElementById('add-item-button');
+    const itemsList = document.getElementById('items-list');
+    const addItemFinancialButton = document.getElementById('add-item-financial-button');
+    const itemsFinancialList = document.getElementById('items-financial-list');
+
+    // Função para esconder e desativar todos os inputs de metas
+    function hideAllGoalInputs() {
+        // Esconder todos os grupos de inputs
+        financialGoalInput.style.display = 'none';
+        itemsGoalInput.style.display = 'none';
+        itemsFinancialGoalInput.style.display = 'none';
+
+        // Desativar inputs de todas as metas
+        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
+    }
+
+    // Alternar para meta financeira
+    financialRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        financialGoalInput.style.display = 'block';
+        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Alternar para meta de itens
+    itemsRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        itemsGoalInput.style.display = 'block';
+        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Alternar para meta de itens e financeira
+    itemsFinancialRadio.addEventListener('change', () => {
+        hideAllGoalInputs();
+        itemsFinancialGoalInput.style.display = 'block';
+        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
+    });
+
+    // Adicionar novos itens para meta de itens
+    addItemButton.addEventListener('click', () => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item-row';
+
+        itemRow.innerHTML = `
+            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+            <button type="button" class="remove-button">x</button>
+        `;
+
+        const removeButton = itemRow.querySelector('.remove-button');
+        removeButton.addEventListener('click', () => {
+            itemsList.removeChild(itemRow);
+        });
+
+        itemsList.appendChild(itemRow);
+    });
+
+    // Adicionar novos itens para meta de itens e financeira
+    addItemFinancialButton.addEventListener('click', () => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item-row';
+
+        itemRow.innerHTML = `
+            <input type="text" name="itemName[]" placeholder="Nome do item" required>
+            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" required>
+            <button type="button" class="remove-button">x</button>
+        `;
+
+        const removeButton = itemRow.querySelector('.remove-button');
+        removeButton.addEventListener('click', () => {
+            itemsFinancialList.removeChild(itemRow);
+        });
+
+        itemsFinancialList.appendChild(itemRow);
+    });
+
+    // Inicializar estado padrão (meta financeira ativa)
+    financialRadio.dispatchEvent(new Event('change'));
+});
+
+
+    </script>
+
+    <script>
+        document.getElementById('open_btn').addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const userAvatar = document.getElementById('user_avatar');
+
+            // Alterna a classe de abertura da sidebar
+            sidebar.classList.toggle('open-sidebar');
+
+            // Alterar a imagem e o tamanho do avatar ao expandir/recolher a sidebar
+            if (sidebar.classList.contains('open-sidebar')) {
+                userAvatar.src = "{{ url_for('static', filename='images/logoComNomeAnimadaDark.gif') }}";
+                userAvatar.style.height = "45px";
+                userAvatar.style.width = "150px";
+                userAvatar.style.marginTop = "5px";
+                userAvatar.style.marginBottom = "5px";
+            } else {
+                userAvatar.src = "{{ url_for('static', filename='images/logoAnimada.gif') }}";
+                userAvatar.style.width = "55px";
+            }
+        });
+
+    </script>
+
+    <script>
+        const main = document.querySelector('main');
+        const modal = document.getElementById('exit-modal');
+        const cancelExitButton = document.getElementById('cancel-exit');
+        const confirmExitButton = document.getElementById('confirm-exit');
+        let pendingNavigation = null;
+
+        // Função para animar o fechamento do modal
+        function closeModalWithAnimation() {
+            modal.classList.add('fade-out'); // Adiciona a classe de animação de saída
+            setTimeout(() => {
+                modal.classList.remove('active', 'fade-out'); // Remove o modal após a animação
+            }, 400); // Tempo igual à duração da animação CSS
+        }
+
+        // Manipula a saída do modal e navegação
+        document.querySelectorAll('.side-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const href = this.querySelector('a')?.getAttribute('href');
+                if (!href || href === "#") return;
+
+                pendingNavigation = href;
+                modal.classList.add('active');
+            });
+        });
+
+        cancelExitButton.addEventListener('click', () => {
+            closeModalWithAnimation(); // Fecha o modal com animação
+            pendingNavigation = null;
+        });
+
+        confirmExitButton.addEventListener('click', () => {
+            if (pendingNavigation) {
+                modal.classList.add('fade-out'); // Adiciona animação ao modal
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    main.classList.add('fade-out'); // Adiciona animação de saída da página
+                    setTimeout(() => {
+                        window.location.href = pendingNavigation; // Navega após a animação
+                    }, 500); // Duração da animação da página
+                }, 400); // Duração da animação do modal
+            }
+        });
+
+        // Animação de entrada na página ao carregar
+        window.addEventListener('load', () => {
+            main.classList.add('fade-in');
+        });
+
+    </script>
+
+
+</body>
+
+</html>
