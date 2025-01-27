@@ -215,19 +215,19 @@
             <div class="profile-info1">
                 <div class="info-item">
                     <i class="fas fa-user"></i>
-                    <p>Nome: Neguinho da XJ</p>
+                    <p>Nome: {{ current_user.name }}</p>
                 </div>
                 <div class="info-item">
                     <i class="fas fa-envelope"></i>
-                    <p>Email: neguinho@example.com</p>
+                    <p>Email: {{ current_user.email }}</p>
                 </div>
                 <div class="info-item">
                     <i class="fas fa-calendar-alt"></i>
-                    <p>Data de Registro: 01/01/2023</p>
+                    <p>Data de Registro: {{ current_user.created_at }}</p>
                 </div>
                 <div class="info-item">
                     <i class="fas fa-phone"></i>
-                    <p>Telefone: (11) 98765-4321</p>
+                    <p>Telefone: {{ current_user.telephone }}</p>
                 </div>
             </div>
         </div>

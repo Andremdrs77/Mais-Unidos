@@ -16,7 +16,7 @@ class User(UserMixin):
         self.email = email
         self.telephone = telephone
         self.password = password
-        self.created_at = created_at
+        self.created_at = created_at.strftime('%d/%m/%Y') if created_at else "Data não disponível"
 
     @staticmethod
     def get(user_id):
