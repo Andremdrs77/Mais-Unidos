@@ -36,16 +36,14 @@ CREATE TABLE tb_campaigns (
 -- Tabela de Doações
 CREATE TABLE tb_donations (
     dnt_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    dnt_usr_id INT NOT NULL, -- Usuário que fez a doação
-    dnt_cam_id INT NOT NULL, -- Campanha associada
-    dnt_value FLOAT DEFAULT NULL, -- Valor doado em dinheiro (se aplicável)
+    dnt_usr_id INT NOT NULL,           -- Usuário que fez a doação
+    dnt_cam_id INT NOT NULL,           -- Campanha associada
+    dnt_value FLOAT DEFAULT NULL,      -- Valor doado em dinheiro (se aplicável)
     dnt_createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (dnt_usr_id) REFERENCES tb_users(usr_id) -- Relaciona com o doador
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-    FOREIGN KEY (dnt_cam_id) REFERENCES tb_campaigns(cam_id) -- Relaciona com a campanha
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
+    FOREIGN KEY (dnt_usr_id) REFERENCES tb_users(usr_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (dnt_cam_id) REFERENCES tb_campaigns(cam_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Tabela de Itens
@@ -64,15 +62,13 @@ CREATE TABLE tb_items (
 -- Tabela de Itens Relacionados a Doações
 CREATE TABLE tb_donation_items (
     dni_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    dni_dnt_id INT NOT NULL, -- Relaciona com a doação
+    dni_dnt_id INT NOT NULL,  -- Relaciona com a doação
     dni_item_id INT NOT NULL, -- Relaciona com o item
     dni_quantity INT NOT NULL, -- Quantidade do item doado
     FOREIGN KEY (dni_dnt_id) REFERENCES tb_donations(dnt_id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
+        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (dni_item_id) REFERENCES tb_items(itm_id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 select * from tb_users;

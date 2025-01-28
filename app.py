@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Item, Campaign, Donation, obter_conexao
+from models import User, Item, Campaign, Donation, DonationItem, obter_conexao
 
 
 app = Flask(__name__)
@@ -341,54 +341,139 @@ def edit_campaign(campaign_id):
         flash("Campanha atualizada com sucesso!", "success")
         return redirect(url_for('campaign'))  # Ou para 'my_campaigns', etc.
 
-@app.route('/donations', methods=['GET'])
+@app.route('/doar_financeiro', methods=['POST'])
+@login_required
+def doar_financeiro():
+    campaign_id = request.form.get('campaign_id')
+    donation_value = request.form.get('donation_value')
+    try:
+        donation_value = float(donation_value)
+    except:
+        flash("Valor inválido.", "danger")
+        return redirect(url_for('make_donations', campaign_id=campaign_id))
+
+    # Cria registro em tb_donations
+    donation_id = Donation.create(
+        user_id=current_user.id,
+        campaign_id=campaign_id,
+        donation_value=donation_value
+    )
+
+    # Atualiza meta na campanha
+    camp = Campaign.get(campaign_id)
+    if camp:
+        new_reached = camp.reached_meta + donation_value
+        Campaign.update(campaign_id, reached_meta=new_reached)
+
+    flash("Doação financeira registrada!", "success")
+    return redirect(url_for('donations'))
+
+@app.route('/doar_itens', methods=['POST'])
+@login_required
+def doar_itens():
+    campaign_id = request.form.get('campaign_id')
+    item_id = request.form.get('item_id')
+    item_quantity = request.form.get('item_quantity')
+
+    try:
+        item_quantity = int(item_quantity)
+    except:
+        flash("Quantidade inválida", "danger")
+        return redirect(url_for('make_donations', campaign_id=campaign_id))
+
+    # 1. Criar doação (sem valor)
+    donation_id = Donation.create(
+        user_id=current_user.id,
+        campaign_id=campaign_id,
+        donation_value=None  # Indica que é itens
+    )
+
+    # 2. Criar pivot (doação-itens)
+    DonationItem.create(donation_id, item_id, item_quantity)
+
+    # 3. Atualizar contagem do item e a meta da campanha
+    item = Item.get(item_id)
+    if item:
+        new_item_reached = item['reached_quantity'] + item_quantity
+        # se new_item_reached > item['quantity']: ...
+        Item.update_quantity(item_id, new_item_reached)
+
+    # Atualiza reached_meta da campanha (se vc soma itens na meta)
+    camp = Campaign.get(campaign_id)
+    if camp:
+        new_reached_meta = camp.reached_meta + item_quantity  # ou conversão
+        Campaign.update(campaign_id, reached_meta=new_reached_meta)
+
+    flash("Doação de itens registrada!", "success")
+    return redirect(url_for('donations'))
+
+@app.route('/donations')
 @login_required
 def donations():
     user_id = current_user.id
     donations_list = Donation.get_by_user(user_id)
 
-    # Filtrar via query string (busca)
+    # Filtro de busca (opcional)
     query = request.args.get('q', '')
     if query:
+        # Se quiser filtrar localmente ...
+        # Exemplo simples (pode adaptar)
         query_lower = query.lower()
         filtered = []
         for d in donations_list:
-            # Combine campos que podem ser pesquisados (ex.: campanha, type, item_name)
-            # Precisaremos talvez buscar o nome da campanha via Campaign.get(...) ou já trazer no SELECT
-            # mas para simplicidade, assumimos que item_name, etc. resolvem
-            combined = f" {d.item_name} {d.value}".lower()
-            # Se contiver o termo, filtramos
-            if query_lower in combined:
-                filtered.append(d)
+            # Montar string para comparar
+            combined = f"{d.value or ''}"
+            # se tiver DonationItem, busque e concatene também
+            filtered.append(d)
         donations_list = filtered
 
-    # Converter cada Donation em dicionário para o template
     donations_data = []
     for d in donations_list:
-        # (Opcional) buscar nome da campanha
-        campaign = Campaign.get(d.campaign_id)
-        campaign_name = campaign.title if campaign else "Campanha desconhecida"
+        # Buscar nome da campanha
+        camp = Campaign.get(d.campaign_id)
+        campaign_name = camp.title if camp else "Campanha desconhecida"
 
-        # Formatar valor ou quantidade
-        if campaign.tipo == 'Financeiro':
-            valor_quantidade = f"R$ {d.value:.2f}"
+        # Montar a string final "valor_quantidade"
+        # 1) Verifica se doação tem valor (d.value)
+        donation_value_str = ""
+        if d.value is not None:
+            donation_value_str = f"R$ {d.value:.2f}"
+
+        # 2) Verifica se doação tem itens via DonationItem (pivô)
+        donation_items = DonationItem.get_by_donation(d.id)  # lista de itemPivot
+        items_str = ""
+        if donation_items:
+            partials = []
+            for di in donation_items:
+                # di.item_id e di.quantity
+                item_info = Item.get(di.item_id)  # Ex.: {"name": "Arroz", ...}
+                partials.append(f"{di.quantity} x {item_info['name']}")
+            items_str = ", ".join(partials)
+
+        # 3) Unificar em uma string final
+        #    Se tiver valor e itens => "R$ 50,00 / 3 x Arroz"
+        #    Se só valor => "R$ 50,00"
+        #    Se só itens => "3 x Arroz"
+        if donation_value_str and items_str:
+            valor_quantidade = donation_value_str + " / " + items_str
         else:
-            # Se doação de itens
-            valor_quantidade = f"{d.item_quantity} x {d.item_name}"
+            valor_quantidade = donation_value_str or items_str or ""
 
         # Formatar data
-        donation_date_str = d.created_at.strftime('%d/%m/%Y') if d.created_at else "Data não disponível"
+        date_str = d.created_at.strftime("%d/%m/%Y") if d.created_at else "N/A"
 
         donations_data.append({
             "id": d.id,
             "campaign_name": campaign_name,
-            "valor_quantidade": valor_quantidade,
-            "date": donation_date_str
+            "donation_value": valor_quantidade,  # campo unificado
+            "date": date_str
         })
 
-    return render_template('donations.html', donations=donations_data, search_term=query)
-
-
+    return render_template(
+        'donations.html',
+        donations=donations_data,
+        search_term=query
+    )
 
 @app.route('/donations/<int:campaign_id>')
 @login_required
@@ -402,74 +487,82 @@ def make_donations(campaign_id):
 
     return render_template('make_donations.html', campaign=campaign, items=items)
 
-
 @app.route('/process_donation', methods=['POST'])
 @login_required
 def process_donation():
     campaign_id = request.form.get('campaign_id')
-    donation_value = request.form.get('donation_value')
+    donation_value = request.form.get('donation_value')  # se for dinheiro
+    item_id = request.form.get('item_id')               # se for itens
+    item_quantity = request.form.get('item_quantity')   # se for itens
 
-    if not donation_value:
-        flash("O valor da doação não pode ser vazio.", "danger")
-        return redirect(url_for('make_donations', campaign_id=campaign_id))
-
-    try:
-        donation_value = float(donation_value)
-    except ValueError:
-        flash("Por favor, insira um valor válido para a doação.", "danger")
-        return redirect(url_for('make_donations', campaign_id=campaign_id))
-
-    # 1. Obter a campanha
+    # 1. Verificar se a campanha existe
     campaign = Campaign.get(campaign_id)
     if not campaign:
         flash("Campanha não encontrada.", "danger")
         return redirect(url_for('index'))
 
-    # 2. Registrar no tb_donations (o user_id é current_user.id)
-    Donation.create(current_user.id, campaign_id, float(donation_value))
+    # GUARDA O ID DA DOAÇÃO PRINCIPAL (caso façamos 1 ou 2 doações)
+    donation_id = None
 
-    # 3. Atualizar reached_meta da campanha
-    Campaign.update(campaign_id, reached_meta=campaign.reached_meta + donation_value)
+    # 2. Lógica de doação financeira, se donation_value foi enviado
+    if donation_value:
+        try:
+            val = float(donation_value)
+        except ValueError:
+            flash("Valor inválido!", "danger")
+            return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-    flash("Doação realizada com sucesso!", "success")
-    return redirect(url_for('index'))
+        # Cria registro principal em 'tb_donations' com dnt_value=val
+        donation_id = Donation.create(
+            user_id=current_user.id,
+            campaign_id=campaign_id,
+            donation_value=val
+        )
 
+        # Atualizar reached_meta
+        new_reached = campaign.reached_meta + val
+        Campaign.update(campaign_id, reached_meta=new_reached)
+        flash("Doação financeira realizada com sucesso!", "success")
 
+    # 3. Lógica de doação de itens, se item_id e item_quantity foram enviados
+    if item_id and item_quantity:
+        try:
+            item_quantity = int(item_quantity)
+        except ValueError:
+            flash("Quantidade de item inválida!", "danger")
+            return redirect(url_for('make_donations', campaign_id=campaign_id))
 
+        # Se ainda não criamos uma doação principal, cria agora (sem valor).
+        if donation_id is None:
+            donation_id = Donation.create(
+                user_id=current_user.id,
+                campaign_id=campaign_id,
+                donation_value=None  # indica doação de itens
+            )
 
-@app.route('/process_item_donation', methods=['POST'])
-@login_required
-def process_item_donation():
-    campaign_id = request.form.get('campaign_id')
-    item_id = request.form.get('item_id')
-    item_quantity = int(request.form.get('item_quantity'))
+        # Agora criar pivot em 'tb_donation_items'
+        DonationItem.create(donation_id, item_id, item_quantity)
 
-    # Validar os dados recebidos
-    if not campaign_id or not item_id or not item_quantity:
-        flash("Dados inválidos para doação de itens.", "danger")
+        # Atualizar contagem do item
+        item_data = Item.get(item_id)
+        if item_data:
+            new_item_reached = item_data['reached_quantity'] + item_quantity
+            if new_item_reached > item_data['quantity']:
+                new_item_reached = item_data['quantity']  # não ultrapassar meta do item
+            Item.update_quantity(item_id, new_item_reached)
+
+        # Atualiza reached_meta da campanha (se quiser somar itens na meta)
+        new_reached_meta = campaign.reached_meta + item_quantity
+        Campaign.update(campaign_id, reached_meta=new_reached_meta)
+
+        flash("Doação de itens realizada com sucesso!", "success")
+
+    # 4. Se usuário não enviou nem donation_value nem item_id, não doou nada
+    if not donation_value and not item_id:
+        flash("Nenhuma informação de doação fornecida!", "danger")
         return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-    # Verificar se o item pertence à campanha
-    item = Item.get(item_id)
-    if not item or int(item['campaign_id']) != int(campaign_id):
-        flash("Item não encontrado ou não pertence à campanha.", "danger")
-        return redirect(url_for('make_donations', campaign_id=campaign_id))
-
-    # Atualizar a quantidade arrecadada do item
-    new_quantity = item['reached_quantity'] + item_quantity
-    if new_quantity > item['quantity']:
-        new_quantity = item['quantity']  # Não ultrapassar a meta do item
-
-    Item.update_quantity(item_id, new_quantity)
-
-    # Atualizar a quantidade total arrecadada na campanha (cam_reachedMeta)
-    campaign = Campaign.get(campaign_id)
-    if campaign:
-        new_campaign_reached_meta = campaign.reached_meta + item_quantity
-        Campaign.update(campaign_id, reached_meta=new_campaign_reached_meta)
-
-    flash('Doação de itens realizada com sucesso!', 'success')
-    return redirect(url_for('make_donations', campaign_id=campaign_id))
+    return redirect(url_for('donations'))
 
 @app.route('/settings')
 @login_required

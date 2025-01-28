@@ -213,7 +213,7 @@
             <tr>
                 <td>{{ d.id }}</td>
                 <td>{{ d.campaign_name }}</td>
-                <td>{{ d.valor_quantidade }}</td>
+                <td>{{ d.donation_value }}</td>
                 <td>{{ d.date }}</td>
             </tr>
             {% endfor %}
@@ -226,7 +226,7 @@
         <div class="donation-card">
             <div><span class="label">ID:</span> <span class="value">{{ d.id }}</span></div>
             <div><span class="label">Campanha:</span> <span class="value">{{ d.campaign_name }}</span></div>
-            <div><span class="label">Valor/Quantidade:</span> <span class="value">{{ d.valor_quantidade }}</span></div>
+            <div><span class="label">Valor/Quantidade:</span> <span class="value">{{ d.donation_value }}</span></div>
             <div><span class="label">Data:</span> <span class="value">{{ d.date }}</span></div>
         </div>
         {% endfor %}

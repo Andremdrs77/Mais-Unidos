@@ -289,22 +289,23 @@ class Donation:
         self.id = dnt_id
         self.user_id = dnt_usr_id
         self.campaign_id = dnt_cam_id
-        self.value = dnt_value
+        self.value = dnt_value        # Se != None => é doação financeira
         self.created_at = dnt_createdAt
 
     @staticmethod
-    def create(user_id, campaign_id, value):
-        """Insere uma nova doação (financeira) na tabela tb_donations."""
+    def create(user_id, campaign_id, donation_value=None):
+        """Cria registro em 'tb_donations' para doações financeiras ou sem valor (caso itens)."""
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        # Ajuste nomes de colunas conforme seu schema
         sql = """
             INSERT INTO tb_donations (dnt_usr_id, dnt_cam_id, dnt_value)
             VALUES (%s, %s, %s)
         """
-        cursor.execute(sql, (user_id, campaign_id, value))
+        cursor.execute(sql, (user_id, campaign_id, donation_value))
         conexao.commit()
+        new_id = cursor.lastrowid  # Precisaremos do ID gerado se formos adicionar items
         conexao.close()
+        return new_id
 
     @staticmethod
     def get_by_user(user_id):
@@ -317,12 +318,52 @@ class Donation:
             ORDER BY dnt_createdAt DESC
         """
         cursor.execute(sql, (user_id,))
-        results = cursor.fetchall()
+        rows = cursor.fetchall()
         conexao.close()
 
         donations = []
-        for row in results:
+        for row in rows:
+            # row = (dnt_id, dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt)
             donation = Donation(*row)
             donations.append(donation)
         return donations
 
+class DonationItem:
+    def __init__(self, dni_id, dni_dnt_id, dni_item_id, dni_quantity):
+        self.id = dni_id
+        self.donation_id = dni_dnt_id
+        self.item_id = dni_item_id
+        self.quantity = dni_quantity
+
+    @staticmethod
+    def create(donation_id, item_id, quantity):
+        """Inserir relação doação-itens."""
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            INSERT INTO tb_donation_items (dni_dnt_id, dni_item_id, dni_quantity)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(sql, (donation_id, item_id, quantity))
+        conexao.commit()
+        conexao.close()
+
+    @staticmethod
+    def get_by_donation(donation_id):
+        """Retorna todos os itens doados para uma doação."""
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            SELECT dni_id, dni_dnt_id, dni_item_id, dni_quantity
+            FROM tb_donation_items
+            WHERE dni_dnt_id = %s
+        """
+        cursor.execute(sql, (donation_id,))
+        rows = cursor.fetchall()
+        conexao.close()
+
+        donation_items = []
+        for row in rows:
+            # row = (dni_id, dni_dnt_id, dni_item_id, dni_quantity)
+            donation_items.append(DonationItem(*row))
+        return donation_items
