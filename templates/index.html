@@ -364,12 +364,12 @@
     }
 
     .table-container {
-    margin: 20px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ccc;
+        margin: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ccc;
     }
 
     table {
@@ -410,9 +410,16 @@
         width: 10%; 
     }
 
-    
+    #top-campaigns-container,
+    #top-donors-container {
+        display: none;
+    }
 
-    
+    .donors-list table {
+        width: 100%;  /* A tabela ocupará 100% do tamanho do container */
+        table-layout: fixed;  /* Isso ajuda a manter uma distribuição uniforme das colunas */
+    }
+
 
 </style>
 {% endblock %}
@@ -625,6 +632,14 @@
     }
     }
 
+    document.getElementById('filter-button').addEventListener('click', function () {
+        const filterSection = document.getElementById('filter-section');
+        if (filterSection.style.display === 'none') {
+            filterSection.style.display = 'block';
+        } else {
+            filterSection.style.display = 'none';
+        }
+    });
 
 </script>
 

@@ -197,55 +197,70 @@ def campaign():
     campaigns = Campaign.get_by_user(user_id)
 
     # --- PARÂMETRO DE BUSCA ---
-    # Se na query string vier algo como ?q=algumTexto
-    query = request.args.get('q', '')  # q é o nome do campo de busca
+    query = request.args.get('q', '')  # 'q' é o nome do parâmetro de busca
     if query:
-        # Exemplo simples com LIKE
         campaigns = Campaign.search_by_title_or_description(user_id, query)
     else:
         campaigns = Campaign.get_by_user(user_id)
 
-    # Montar a lista campaigns_data (igual ao index)
-    campaigns_data = []
-    for campaign_obj in campaigns:
-        progress = (campaign_obj.reached_meta / campaign_obj.meta_value * 100) if campaign_obj.meta_value > 0 else 0
+    # Função para montar a lista de dados das campanhas
+    def prepare_campaigns_data(campaigns):
+        campaigns_data = []
+        for campaign_obj in campaigns:
+            progress = (campaign_obj.reached_meta / campaign_obj.meta_value * 100) if campaign_obj.meta_value > 0 else 0
 
-        if progress >= 100 and campaign_obj.status != "Concluída":
-            campaign_obj.status = "Concluída"
-            Campaign.update(campaign_obj.id, status="Concluída")
+            if progress >= 100 and campaign_obj.status != "Concluída":
+                campaign_obj.status = "Concluída"
+                Campaign.update(campaign_obj.id, status="Concluída")
 
-        created_at = campaign_obj.created_at.strftime('%d/%m/%Y %H:%M:%S') if campaign_obj.created_at else "Data não disponível"
-        deadline = campaign_obj.deadline.strftime('%d/%m/%Y') if campaign_obj.deadline else "Prazo não definido"
+            created_at = campaign_obj.created_at.strftime('%d/%m/%Y %H:%M:%S') if campaign_obj.created_at else "Data não disponível"
+            deadline = campaign_obj.deadline.strftime('%d/%m/%Y') if campaign_obj.deadline else "Prazo não definido"
 
-        if campaign_obj.tipo == "Financeiro":
-            meta = f"R$ {campaign_obj.meta_value:.2f}"
-        elif campaign_obj.tipo == "Itens":
-            items_data = Item.get_by_campaign(campaign_obj.id)
-            meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
-        elif campaign_obj.tipo == "Itens e Financeiro":
-            items_data = Item.get_by_campaign(campaign_obj.id)
-            item_meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
-            meta = f"{item_meta} ou R$ {campaign_obj.meta_value:.2f}"
-        else:
-            meta = "Meta não definida"
+            if campaign_obj.tipo == "Financeiro":
+                meta = f"R$ {campaign_obj.meta_value:.2f}"
+            elif campaign_obj.tipo == "Itens":
+                items_data = Item.get_by_campaign(campaign_obj.id)
+                meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
+            elif campaign_obj.tipo == "Itens e Financeiro":
+                items_data = Item.get_by_campaign(campaign_obj.id)
+                item_meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
+                meta = f"{item_meta} ou R$ {campaign_obj.meta_value:.2f}"
+            else:
+                meta = "Meta não definida"
 
-        visual_progress = min(progress, 100)
+            visual_progress = min(progress, 100)
 
-        campaigns_data.append({
-            "id": campaign_obj.id,
-            "title": campaign_obj.title,
-            "description": campaign_obj.description,
-            "tipo": campaign_obj.tipo,
-            "status": campaign_obj.status,
-            "created_at": created_at,
-            "deadline": deadline,
-            "meta": meta,
-            "progress": progress,
-            "visual_progress": visual_progress
-        })
+            campaigns_data.append({
+                "id": campaign_obj.id,
+                "title": campaign_obj.title,
+                "description": campaign_obj.description,
+                "tipo": campaign_obj.tipo,
+                "status": campaign_obj.status,
+                "created_at": created_at,
+                "deadline": deadline,
+                "meta": meta,
+                "progress": progress,
+                "visual_progress": visual_progress
+            })
+        return campaigns_data
 
-    # Renderiza o template e passa "search_term=query" para exibir o valor no input
-    return render_template('campaign.html', campaigns=campaigns_data, search_term=query)
+    # 1. Preparar os dados para as campanhas recentes
+    most_recent = Campaign.get_by_recents()  # Pegue as campanhas mais recentes
+    most_recent_data = prepare_campaigns_data(most_recent)
+
+    # 2. Preparar os dados para as campanhas mais sucedidas
+    most_successful = Campaign.get_by_sucess()  # Pegue as campanhas mais sucedidas
+    most_successful_data = prepare_campaigns_data(most_successful)
+
+    # Renderiza o template e passa as variáveis
+    return render_template(
+        'campaign.html',
+        campaigns=prepare_campaigns_data(campaigns),
+        most_recent=most_recent_data,  # Passando as campanhas recentes
+        most_successful=most_successful_data,  # Passando as campanhas mais sucedidas
+        search_term=query  # Passando o termo de busca para o input
+    )
+
 
 @app.route('/create-campaign', methods=['GET', 'POST'])
 @login_required
