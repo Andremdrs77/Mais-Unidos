@@ -163,6 +163,25 @@ def index():
         search_term=query
     )
 
+@app.route('/delete-campaign/<int:campaign_id>', methods=['POST'])
+@login_required
+def delete_campaign(campaign_id):
+    # 1. Buscar a campanha no banco
+    campaign = Campaign.get(campaign_id)
+    if not campaign:
+        flash("Campanha não encontrada.", "danger")
+        return redirect(url_for('campaign'))
+
+    # 2. Verificar se o usuário atual é dono da campanha (boa prática de segurança)
+    if campaign.usr_id != current_user.id:
+        flash("Você não tem permissão para excluir esta campanha.", "danger")
+        return redirect(url_for('campaign'))
+
+    # 3. Executar a exclusão (isso chamará o DELETE na base de dados)
+    Campaign.delete(campaign_id)
+
+    flash("Campanha excluída com sucesso!", "success")
+    return redirect(url_for('campaign'))
 
 @app.route('/profile')
 @login_required

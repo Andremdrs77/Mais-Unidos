@@ -156,6 +156,20 @@ class Campaign:
         self.deleted_at = deleted_at
         self.usr_id = usr_id
 
+    @staticmethod
+    def delete(campaign_id):
+        conn = obter_conexao()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM tb_items WHERE campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_donations WHERE dnt_campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_campaigns WHERE id = %s", (campaign_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @staticmethod
     def get(campaign_id):
