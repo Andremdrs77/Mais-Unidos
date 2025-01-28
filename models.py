@@ -182,68 +182,6 @@ class Item:
 
     @staticmethod
     def update_quantity(item_id, new_quantity):
-        conexao = obter_conexao()
-        cursor = conexao.cursor()
-        cursor.execute("UPDATE tb_items SET itm_reachedQuantity = %s WHERE itm_id = %s", (new_quantity, item_id))
-        conexao.commit()
-        conexao.close()
-
-    @staticmethod
-    def delete_by_campaign(campaign_id):
-        conexao = obter_conexao()
-        cursor = conexao.cursor()
-        cursor.execute("DELETE FROM tb_items WHERE itm_cam_id = %s", (campaign_id,))
-        conexao.commit()
-        conexao.close()
-class Campaign:
-    def __init__(self, id, title, description, deadline, meta_value, reached_meta, tipo, status, created_at, deleted_at, usr_id):
-        self.id = id
-        self.title = title
-        self.description = description
-        self.deadline = deadline
-        self.meta_value = meta_value
-        self.reached_meta = reached_meta
-        self.tipo = tipo
-        self.status = status
-        self.created_at = created_at
-        self.deleted_at = deleted_at
-        self.usr_id = usr_id
-
-    @staticmethod
-    def delete(campaign_id):
-        conn = obter_conexao()
-        cursor = conn.cursor()
-
-        cursor.execute("DELETE FROM tb_items WHERE campaign_id = %s", (campaign_id,))
-
-        cursor.execute("DELETE FROM tb_donations WHERE dnt_campaign_id = %s", (campaign_id,))
-
-        cursor.execute("DELETE FROM tb_campaigns WHERE id = %s", (campaign_id,))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-    @staticmethod
-    def get(campaign_id):
-        conexao = obter_conexao()
-        cursor = conexao.cursor()
-        cursor.execute("SELECT * FROM tb_campaigns WHERE cam_id = %s", (campaign_id,))
-        result = cursor.fetchone()
-        conexao.close()
-        if result:
-            return Campaign(*result)
-        return None
-    
-    @staticmethod
-    def search_by_title_or_description(user_id, query):
-        conexao = obter_conexao()
-        cursor = conexao.cursor()
-        sql = "SELECT * FROM tb_campaigns WHERE cam_usr_id = %s AND (cam_title LIKE %s OR cam_description LIKE %s)"
-        like_query = f"%{query}%"
-        cursor.execute(sql, (user_id, like_query, like_query))
-        results = cursor.fetchall()
-        conexao.close()
 
         campaigns = []
         for row in results:
