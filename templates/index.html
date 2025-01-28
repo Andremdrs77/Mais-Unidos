@@ -201,6 +201,150 @@
         }
     }
 </style>
+
+<style>
+    .button-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-button {
+        padding: 11px;
+        border: none;
+        border-radius: 5px;
+        background-color: #0d2329;
+        color: white;
+        cursor: pointer;
+    }
+
+    .filter-button i {
+        margin-right: 5px;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown button {
+        padding: 11px;
+        border: none;
+        border-radius: 5px;
+        background-color: #0d2329;
+        color: white;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #ffffff;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .dropdown-content button {
+        padding: 10px;
+        width: 100%;
+        border: none;
+        background-color: #fff;
+        color: #0d2329;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .dropdown-content button:hover {
+        background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Estilo da seção de filtros */
+    .filter-section {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-row {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-row label {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .filter-row input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .apply-filter-button {
+        padding: 10px 20px;
+        background-color: #0d2329;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        align-self: center;
+    }
+
+    .apply-filter-button:hover {
+        background-color: #092022;
+    }
+
+    @media (max-width: 768px) {
+        .button-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .filter-button,
+        .dropdown button {
+            width: 100%;
+        }
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-row {
+            width: 100%;
+        }
+
+        .apply-filter-button {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -216,16 +360,34 @@
            name="q" 
            placeholder="Pesquisar campanhas..." 
            value="{{ search_term|default('') }}">
-    <div class="dropdown" id="period-dropdown">
-        <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
-        <div class="dropdown-content">
-            <button data-period="7" type="button">Últimos 7 dias</button>
-            <button data-period="30" type="button">Últimos 30 dias</button>
-            <button data-period="60" type="button">Últimos 60 dias</button>
-            <button data-period="90" type="button">Últimos 90 dias</button>
+    <div class="button-group">
+        <div class="dropdown" id="period-dropdown">
+            <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
+            <div class="dropdown-content">
+                <button data-period="7" type="button">Últimos 7 dias</button>
+                <button data-period="30" type="button">Últimos 30 dias</button>
+                <button data-period="60" type="button">Últimos 60 dias</button>
+                <button data-period="90" type="button">Últimos 90 dias</button>
+            </div>
         </div>
+        <button type="button" id="filter-button" class="filter-button">
+            <i class="fa fa-filter"></i> Filtros
+        </button>
     </div>
 </form>
+
+<div id="filter-section" class="filter-section" style="display: none;">
+    <div class="filter-row">
+        <label for="start-date">Data de Início:</label>
+        <input type="date" id="start-date" name="start_date">
+    </div>
+    <div class="filter-row">
+        <label for="end-date">Data de Fim:</label>
+        <input type="date" id="end-date" name="end_date">
+    </div>
+    <button type="submit" class="apply-filter-button">Aplicar Filtros</button>
+</div>
+
 
 <div class="tabs">
     <div class="tab-buttons">
@@ -276,6 +438,17 @@
             const period = this.getAttribute('data-period');
             alert(`Filtrar campanhas por período: Últimos ${period} dias`);
         });
+    });
+</script>
+
+<script>
+    document.getElementById('filter-button').addEventListener('click', function () {
+        const filterSection = document.getElementById('filter-section');
+        if (filterSection.style.display === 'none') {
+            filterSection.style.display = 'block';
+        } else {
+            filterSection.style.display = 'none';
+        }
     });
 </script>
 
