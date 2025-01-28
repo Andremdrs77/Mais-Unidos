@@ -10,13 +10,19 @@ def obter_conexao():
     )   
 
 class User(UserMixin):
-    def __init__(self, id, name, email, telephone, password, created_at):
+    def __init__(self, id, name, email, telephone, password, created_at, itemDonations, valueDonations, engagedCampaigns):
         self.id = id
         self.name = name
         self.email = email
         self.telephone = telephone
         self.password = password
         self.created_at = created_at.strftime('%d/%m/%Y') if created_at else "Data não disponível"
+        self.engagedCampaigns = engagedCampaigns
+        self.itemDonations = itemDonations
+        self.valueDonations = valueDonations
+        self.itemPercentage = (self.itemDonations * 100) / self.valueDonations if self.valueDonations > 0 else 0
+        self.valuePercentage = (self.valueDonations * 100) / self.itemDonations if self.itemDonations > 0 else 0
+
 
     @staticmethod
     def get(user_id):
@@ -26,7 +32,7 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
         return None
 
     @staticmethod
@@ -37,16 +43,16 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
         return None
 
     @staticmethod
-    def create(name, email, telephone, password):
+    def create(name, email, telephone, password, itemDonations, valueDonations, engagedCampaigns):
         conexao = obter_conexao()
         cursor = conexao.cursor()
         cursor.execute(
-            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password) VALUES (%s, %s, %s, %s)",
-            (name, email, telephone, password)
+            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonations, usr_valueDonations, usr_engagedCampaigns) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (name, email, telephone, password, itemDonations, valueDonations, engagedCampaigns)
         )
         conexao.commit()
         conexao.close()
@@ -112,7 +118,6 @@ class Item:
         conexao.close()
 
 
-
 class Campaign:
     def __init__(self, id, title, description, deadline, meta_value, reached_meta, tipo, status, created_at, deleted_at, usr_id):
         self.id = id
@@ -151,7 +156,7 @@ class Campaign:
             (title, description, deadline, meta_value, tipo, usr_id)
         )
         conexao.commit()
-        campaign_id = cursor.lastrowid  # Obter o ID da campanha recém-criada
+        campaign_id = cursor.lastrowid 
         conexao.close()
         return campaign_id
 
@@ -160,7 +165,6 @@ class Campaign:
         conexao = obter_conexao()
         cursor = conexao.cursor()
 
-        # Criar os valores de atualização dinamicamente
         updates = []
         values = []
         if title:

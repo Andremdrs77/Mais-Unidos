@@ -52,7 +52,7 @@ def login_and_register():
                 return redirect(url_for('login_and_register'))
 
             hashed_password = generate_password_hash(password)
-            User.create(name=name, email=email, telephone=telephone, password=hashed_password)
+            User.create(name=name, email=email, telephone=telephone, password=hashed_password, itemDonations=0, valueDonations=0, engagedCampaigns=0)
             flash('Usuário registrado com sucesso!', 'success')
             return redirect(url_for('index'))
 
