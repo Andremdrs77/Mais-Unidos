@@ -71,9 +71,8 @@ def login_and_register():
                         email=email, 
                         telephone=telephone, 
                         password=hashed_password,
-                        itemDonations=0,
-                        valueDonations=0,
-                        engagedCampaigns=0
+                        itemDonationsTotal=0,
+                        valueDonationsTotal=0
                     )
                     return redirect(url_for('index'))
         
