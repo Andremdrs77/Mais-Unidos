@@ -239,7 +239,7 @@
                     <div class="fas fa-2x fa-hand-holding-usd" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas " style="color: #05664f;">
                         <p>Total de dinheiro doado:</p>
-                        <p>R${{ current_user.valueDonations }}</p>
+                        <p>R${{ current_user.valueDonationsTotal }}</p>
                     </div>
                 </div>
                 <!-- Item 2 -->
@@ -247,7 +247,7 @@
                     <div class="fas fa-2x fa-gift" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas" style="color: #05664f;">
                         <p>Total de itens doados:</p>
-                        <p>{{ current_user.itemDonations }}</p>
+                        <p>{{ current_user.itemDonationsTotal }}</p>
                     </div>
                 </div>
                 <!-- Item 3 -->
@@ -255,7 +255,7 @@
                     <div class="fas fa-2x fa-handshake" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas " style="color: #05664f;">
                         <p>Total de contribuições:</p>
-                        <p>777 contribuições</p>
+                        <p>{{ current_user.totalContributions }}</p>
                     </div>
                 </div>
                 <!-- Item 4 -->
@@ -271,7 +271,7 @@
                     <div class="fas fa-2x fa-users" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas " style="color: #05664f;">
                         <p>Total de campanhas ativas:</p>
-                        <p>777 campanhas</p>
+                        <p>{{ current_user.activeCampaigns }}</p>
                     </div>
                 </div>
                 <!-- Item 6 -->
@@ -279,7 +279,7 @@
                     <div class="fas fa-2x fa-clipboard-check" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas " style="color: #05664f;">
                         <p>Maior doação feita:</p>
-                        <p>R$500,00</p>
+                        <p>R${{ current_user.majorDonation }}</p>
                     </div>
                 </div>
                 <!-- Item 7 -->
@@ -287,7 +287,7 @@
                     <div class="fas fa-2x fa-circle-dollar-to-slot" style="color: #05664f; margin-bottom: 10px;"></div>
                     <div class="info2-item-text fas " style="color: #05664f;">
                         <p>Contribuição média por campanha:</p>
-                        <p>R$350,00</p>
+                        <p>R$ {{ current_user.averagePerCampaign }}</p>
                     </div>
                 </div>
                 <!-- Item 8 -->

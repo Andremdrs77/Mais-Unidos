@@ -10,9 +10,8 @@ CREATE TABLE tb_users (
     usr_telephone VARCHAR(20) NOT NULL,
     usr_password TEXT NOT NULL,
     usr_createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usr_itemDonations INT DEFAULT 0,
-    usr_valueDonations DECIMAL(10,2) DEFAULT 0,
-    usr_engagedCampaigns INT DEFAULT 0
+    usr_itemDonationsTotal INT DEFAULT 0,
+    usr_valueDonationsTotal DECIMAL(10,2) DEFAULT 0
 );
 
 -- Tabela de Campanhas
@@ -74,5 +73,5 @@ CREATE TABLE tb_donation_items (
 select * from tb_users;
 select * from tb_campaigns;
 select * from tb_items;
-
-update tb_campaigns set cam_reachedMeta = 10 where cam_id = 3;
+select * from tb_donations;
+select * from tb_donation_items;

@@ -10,18 +10,24 @@ def obter_conexao():
     )   
 
 class User(UserMixin):
-    def __init__(self, id, name, email, telephone, password, created_at, itemDonations, valueDonations, engagedCampaigns):
+    def __init__(self, id, name, email, telephone, password, created_at, itemDonationsTotal, valueDonationsTotal):
         self.id = id
         self.name = name
         self.email = email
         self.telephone = telephone
         self.password = password
         self.created_at = created_at.strftime('%d/%m/%Y') if created_at else "Data não disponível"
-        self.engagedCampaigns = engagedCampaigns
-        self.itemDonations = itemDonations
-        self.valueDonations = valueDonations
-        self.itemPercentage = (self.itemDonations * 100) / self.valueDonations if self.valueDonations > 0 else 0
-        self.valuePercentage = (self.valueDonations * 100) / self.itemDonations if self.itemDonations > 0 else 0
+
+        # Exibir nas informações do perfil
+        self.itemDonationsTotal = itemDonationsTotal
+        self.valueDonationsTotal = valueDonationsTotal
+        self.get_major_donation()
+        self.get_valueDonationsTotal()
+        self.get_totalContributions()
+        self.get_engagedCampaigns()
+        self.get_activeCampaigns()
+        self.averagePerCampaign = self.valueDonationsTotal / self.engagedCampaigns if self.engagedCampaigns > 0 and self.valueDonationsTotal > 0 else 0
+
 
 
     @staticmethod
@@ -32,7 +38,7 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
         return None
 
     @staticmethod
@@ -43,16 +49,63 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
         return None
+    
+    def get_major_donation(self):        
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = "SELECT MAX(dnt_value) FROM tb_donations WHERE dnt_usr_id = %s"
+        cursor.execute(sql, (self.id,))
+        result = cursor.fetchone()
+        conexao.close()
+        self.majorDonation = result[0] if result and result[0] is not None else 0
+
+    def get_valueDonationsTotal(self):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = "SELECT SUM(dnt_value) FROM tb_donations WHERE dnt_usr_id = %s"
+        cursor.execute(sql, (self.id,))
+        result = cursor.fetchone()
+        conexao.close()
+        self.valueDonationsTotal = result[0] if result and result[0] is not None else 0
+
+    def get_totalContributions(self):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = "SELECT COUNT(*) FROM tb_donations WHERE dnt_usr_id = %s"
+        cursor.execute(sql, (self.id,))
+        result = cursor.fetchone()
+        conexao.close()
+        self.totalContributions = result[0] if result and result[0] is not None else 0
+
+    def get_activeCampaigns(self):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        # Corrigir a consulta SQL
+        sql = "SELECT COUNT(DISTINCT cam_id) FROM tb_campaigns WHERE cam_usr_id = %s and cam_status = 'ativa'"
+        cursor.execute(sql, (self.id,))
+        result = cursor.fetchone()
+        conexao.close()
+        self.activeCampaigns = result[0] if result and result[0] is not None else 0
+
+    def get_engagedCampaigns(self):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        # Corrigir a consulta SQL
+        sql = "SELECT COUNT(DISTINCT dnt_cam_id) FROM tb_donations WHERE dnt_usr_id = %s"
+        cursor.execute(sql, (self.id,))
+        result = cursor.fetchone()
+        conexao.close()
+        self.engagedCampaigns = result[0] if result and result[0] is not None else 0
 
     @staticmethod
-    def create(name, email, telephone, password, itemDonations, valueDonations, engagedCampaigns):
+    def create(name, email, telephone, password, itemDonationsTotal, valueDonationsTotal):
         conexao = obter_conexao()
         cursor = conexao.cursor()
         cursor.execute(
-            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonations, usr_valueDonations, usr_engagedCampaigns) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (name, email, telephone, password, itemDonations, valueDonations, engagedCampaigns)
+            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonationsTotal, usr_valueDonationsTotal) VALUES (%s, %s, %s, %s, %s, %s)",
+            (name, email, telephone, password, itemDonationsTotal, valueDonationsTotal)
         )
         conexao.commit()
         conexao.close()
@@ -156,6 +209,20 @@ class Campaign:
         self.deleted_at = deleted_at
         self.usr_id = usr_id
 
+    @staticmethod
+    def delete(campaign_id):
+        conn = obter_conexao()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM tb_items WHERE campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_donations WHERE dnt_campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_campaigns WHERE id = %s", (campaign_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @staticmethod
     def get(campaign_id):
