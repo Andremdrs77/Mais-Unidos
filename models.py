@@ -209,6 +209,20 @@ class Campaign:
         self.deleted_at = deleted_at
         self.usr_id = usr_id
 
+    @staticmethod
+    def delete(campaign_id):
+        conn = obter_conexao()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM tb_items WHERE campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_donations WHERE dnt_campaign_id = %s", (campaign_id,))
+
+        cursor.execute("DELETE FROM tb_campaigns WHERE id = %s", (campaign_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @staticmethod
     def get(campaign_id):
@@ -331,6 +345,49 @@ class Campaign:
             for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
                 cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
         ]
+    
+    @staticmethod
+    def get_by_recents():
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        
+        cursor.execute("SELECT * FROM tb_campaigns ORDER BY cam_createdAt DESC")
+        results = cursor.fetchall()
+        conexao.close()
+
+        return [
+            Campaign(
+                cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            )
+            for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
+        ]
+    
+    @staticmethod
+    def get_by_sucess():
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        
+        cursor.execute("""
+        SELECT cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+        cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+        FROM tb_campaigns
+        WHERE cam_meta > 0
+        ORDER BY (cam_reachedMeta / cam_meta * 100) DESC
+        """)
+
+        results = cursor.fetchall()
+        conexao.close()
+
+        return [
+            Campaign(
+                cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            )
+            for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
+        ]
 
 
 
@@ -380,6 +437,62 @@ class Donation:
             donation = Donation(*row)
             donations.append(donation)
         return donations
+    
+    @staticmethod
+    def get_top_donors(limit=10):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            SELECT usr_id, usr_name, SUM(dnt_value) AS total_donated
+            FROM tb_donations
+            JOIN tb_users ON usr_id = dnt_usr_id
+            GROUP BY usr_id
+            HAVING total_donated > 0
+            ORDER BY total_donated DESC
+            LIMIT %s
+        """
+        cursor.execute(sql, (limit,))
+        rows = cursor.fetchall()
+        conexao.close()
+
+        top_donors = []
+        for row in rows:
+            user_id, user_name, total_donated = row
+            top_donors.append({
+                'user_id': user_id,
+                'user_name': user_name,
+                'total_donated': total_donated
+            })
+        return top_donors
+
+    @staticmethod
+    def get_top_donors_items(limit=10):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            SELECT usr_id, usr_name, SUM(dni_quantity) AS total_items_donated
+            FROM tb_donation_items
+            JOIN tb_donations ON dnt_id = dni_dnt_id
+            JOIN tb_users ON usr_id = dnt_usr_id
+            GROUP BY usr_id
+            HAVING total_items_donated > 0
+            ORDER BY total_items_donated DESC
+            LIMIT %s
+        """
+        cursor.execute(sql, (limit,))
+        rows = cursor.fetchall()
+        conexao.close()
+
+        top_donors = []
+        for row in rows:
+            user_id, user_name, total_items_donated = row
+            top_donors.append({
+                'user_id': user_id,
+                'user_name': user_name,
+                'total_items_donated': total_items_donated
+            })
+        return top_donors
+
 
 class DonationItem:
     def __init__(self, dni_id, dni_dnt_id, dni_item_id, dni_quantity):

@@ -158,6 +158,8 @@
         background-color: #05664f;
         color: #fff;
         border: none;
+        width: 33%;
+        min-width: 90px;
         border-radius: 5px;
         cursor: pointer;
     }
@@ -319,6 +321,8 @@
         background-color: #092022;
     }
 
+
+
     @media (max-width: 768px) {
         .button-group {
             flex-direction: column;
@@ -344,6 +348,72 @@
             text-align: center;
         }
     }
+
+
+    #top-donors-container {
+        margin: 20px auto;
+        padding: 20px;
+        max-width: 90%;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        gap: 20px; 
+    }
+
+    .table-container {
+    margin: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse; /* Garante que as bordas internas se fundam */
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: center; /* Centraliza o texto */
+        border: 1px solid #ddd; /* Adiciona bordas internas nas células */
+    }
+
+    th {
+        background-color: #05664f;
+        color: white;
+        font-size: 16px;
+    }
+
+    td {
+        color: #555;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    table thead th {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .small-column {
+        width: 10%; 
+    }
+
+    
+
+    
+
 </style>
 {% endblock %}
 
@@ -393,11 +463,13 @@
     <div class="tab-buttons">
         <button class="active" id="all-campaigns">TODAS AS CAMPANHAS</button>
         <button id="top-campaigns">CAMPANHAS MAIS BEM-SUCEDIDAS</button>
+        <button id="top-donors">TOP 10 DOADORES</button>
     </div>
 </div>
 
-<div id="campaign-container" class="campaign-container">
-    {% for campaign in campaigns %}
+<!-- Container para as "Todas as campanhas" -->
+<div id="all-campaigns-container" class="campaign-container">
+    {% for campaign in most_recent %}
     <div class="campaign-card">
         <h3>{{ campaign.title }}</h3>
         <p><strong>Descrição:</strong> {{ campaign.description }}</p>
@@ -420,36 +492,140 @@
     {% endfor %}
 </div>
 
+<!-- Container para as "Campanhas mais bem-sucedidas" -->
+<div id="top-campaigns-container" class="campaign-container" style="display: none;">
+    {% for campaign in most_successful %}
+    <div class="campaign-card">
+        <h3>{{ campaign.title }}</h3>
+        <p><strong>Descrição:</strong> {{ campaign.description }}</p>
+        <p><strong>Tipo:</strong> {{ campaign.tipo }}</p>
+        <p><strong>Status:</strong> {{ campaign.status }}</p>
+        <p><strong>Criado em:</strong> {{ campaign.created_at }}</p>
+        <p><strong>Criador:</strong> {{ campaign.user_name }}</p>
+        <p><strong>Prazo:</strong> {{ campaign.deadline }}</p>
+        <p><strong>Meta:</strong> {{ campaign.meta }}</p>
+        <p><strong>Progresso:</strong></p>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ campaign.visual_progress }}%;">
+                {{ campaign.visual_progress|round(1) }}%
+            </div>
+        </div>
+        <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
+            <button class="donate-button">Doar</button>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Container para os "Top Doadores" -->
+<div id="top-donors-container" class="campaign-container">
+    <div class="dropdown" id="period-dropdown">
+        <button type="button">Selecionar categoria<i class="fa fa-chevron-down"></i></button>
+        <div class="dropdown-content">
+            <button type="button" id="money-tab" onclick="switchTab('money')">Doação de Dinheiro</button>
+            <button type="button" id="items-tab" onclick="switchTab('items')">Doação de Itens</button>
+        </div>
+    </div>
+
+    <!-- Container para "Top Doadores de Itens" -->
+    <div id="items-top-donors" class="donors-list">
+      <table class="campaign-card">
+        <thead>
+          <tr>
+            <th>Top</th>
+            <th class="small-column">ID do Usuário</th>
+            <th>Nome</th>
+            <th>Total de Itens</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for donor in top_item_donors %}
+          <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td class="small-column">{{ donor.user_id }}</td>
+            <td><strong>{{ donor.user_name }}</strong></td>
+            <td><strong>{{ donor.total_items_donated }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Container para "Top Doadores de Dinheiro" -->
+    <div id="money-top-donors" class="donors-list" style="display: none;">
+      <table class="campaign-card">
+        <thead>
+          <tr>
+            <th>Top</th>
+            <th class="small-column">ID do Usuário</th>
+            <th>Nome</th>
+            <th>Total Doado (R$)</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for donor in top_money_donors %}
+          <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td class="small-column">{{ donor.user_id }}</td>
+            <td><strong>{{ donor.user_name }}</strong></td>
+            <td><strong>{{ donor.total_donated }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+</div>
+
 <script>
+    // Trocar entre as campanhas quando as abas forem clicadas
     document.getElementById('top-campaigns').addEventListener('click', function () {
-        document.getElementById('period-dropdown').style.display = 'block';
+        document.getElementById('top-campaigns-container').style.display = 'flex';
+        document.getElementById('all-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'none';
         this.classList.add('active');
         document.getElementById('all-campaigns').classList.remove('active');
+        document.getElementById('top-donors').classList.remove('active');
     });
 
     document.getElementById('all-campaigns').addEventListener('click', function () {
-        document.getElementById('period-dropdown').style.display = 'block';
+        document.getElementById('all-campaigns-container').style.display = 'flex';
+        document.getElementById('top-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'none';
         this.classList.add('active');
+        document.getElementById('top-campaigns').classList.remove('active');
+        document.getElementById('top-donors').classList.remove('active');
+    });
+
+    document.getElementById('top-donors').addEventListener('click', function () {
+        document.getElementById('all-campaigns-container').style.display = 'none';
+        document.getElementById('top-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'flex';
+        this.classList.add('active');
+        document.getElementById('all-campaigns').classList.remove('active');
         document.getElementById('top-campaigns').classList.remove('active');
     });
 
-    document.querySelectorAll('.dropdown-content button').forEach(button => {
-        button.addEventListener('click', function () {
-            const period = this.getAttribute('data-period');
-            alert(`Filtrar campanhas por período: Últimos ${period} dias`);
-        });
-    });
-</script>
+    function switchTab(type) {
+    // Esconde ambos os containers
+    const itemsTab = document.getElementById('items-top-donors');
+    const moneyTab = document.getElementById('money-top-donors');
+    
+    if (type === 'items') {
+        itemsTab.style.display = 'flex';
+        moneyTab.style.display = 'none';
+        document.getElementById('items-tab').classList.add('active');
+        document.getElementById('money-tab').classList.remove('active');
+    } else {
+        itemsTab.style.display = 'none';
+        moneyTab.style.display = 'flex';
+        document.getElementById('money-tab').classList.add('active');
+        document.getElementById('items-tab').classList.remove('active');
+    }
+    }
 
-<script>
-    document.getElementById('filter-button').addEventListener('click', function () {
-        const filterSection = document.getElementById('filter-section');
-        if (filterSection.style.display === 'none') {
-            filterSection.style.display = 'block';
-        } else {
-            filterSection.style.display = 'none';
-        }
-    });
+
 </script>
 
 {% endblock %}

@@ -170,10 +170,12 @@
 
     .campaign-card .donate-button {
         margin-top: 10px;
+        margin-right: 5px;
         padding: 10px;
         background-color: #05664f;
         color: #fff;
         border: none;
+        width: 100%;
         border-radius: 5px;
         cursor: pointer;
     }
@@ -190,11 +192,30 @@
         background-color: #FFA500;
         color: #fff;
         border: none;
+        width: 100%;
         border-radius: 5px;
         cursor: pointer;
     }
     .campaign-card .edit-button:hover {
         background-color: #cc8400;
+    }
+
+    .campaign-card .delete-button {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        background-color: #d30e0e; /* Laranja */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .campaign-card .delete:hover {
+        background-color: #b20d0d;
+    }
+
+    .campaign-card a {
+        text-decoration: none;
     }
 
     @media (max-width: 768px) {
@@ -280,13 +301,28 @@
             </div>
         </div>
 
-        <!-- Botões (Editar/Doar) -->
-        <a href="{{ url_for('edit_campaign', campaign_id=campaign.id) }}">
-          <button class="edit-button">Editar</button>
-        </a>
-        <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
-          <button class="donate-button">Doar</button>
-        </a>
+        <!-- Botões (Editar/Doar/Excluir) -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: center;">
+            <!-- Botão Editar -->
+            <a style='width: 100%;' href="{{ url_for('edit_campaign', campaign_id=campaign.id) }}">
+                <button class="edit-button">Editar</button>
+            </a>
+
+            <!-- Botão Doar -->
+            <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
+                <button class="donate-button">Doar</button>
+            </a>
+
+            <!-- Botão Excluir (Formulário para enviar POST) -->
+            <form 
+                action="{{ url_for('delete_campaign', campaign_id=campaign.id) }}" 
+                method="POST"
+                onsubmit="return confirm('Tem certeza que deseja excluir esta campanha?');"
+                style="margin: 0; width: 100%;"
+            >
+                <button class="delete-button" type="submit">Excluir</button>
+            </form>
+        </div>
     </div>
     {% endfor %}
 </div>
