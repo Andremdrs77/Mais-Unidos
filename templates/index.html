@@ -355,6 +355,10 @@
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        gap: 20px; 
     }
 
     .table-container {
@@ -403,6 +407,8 @@
     .small-column {
         width: 10%; 
     }
+
+    
 
     
 
@@ -512,7 +518,7 @@
 <!-- Container para os "Top Doadores" -->
 <div id="top-donors-container" class="campaign-container">
     <div class="dropdown" id="period-dropdown">
-        <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
+        <button type="button">Selecionar categoria<i class="fa fa-chevron-down"></i></button>
         <div class="dropdown-content">
             <button type="button" id="money-tab" onclick="switchTab('money')">Doação de Dinheiro</button>
             <button type="button" id="items-tab" onclick="switchTab('items')">Doação de Itens</button>
@@ -568,7 +574,7 @@
         </tbody>
       </table>
     </div>
-  </div>
+</div>
 
 <script>
     // Trocar entre as campanhas quando as abas forem clicadas
