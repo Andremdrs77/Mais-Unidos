@@ -581,7 +581,7 @@ def process_donation():
         if campaign.tipo == "Itens e Financeiro":
             item_val_unit = item_data['value'] or 0
             total_item_value = item_val_unit * item_quantity
-            new_reached_meta = campaign.reached_meta + total_item_value + donation_value
+            new_reached_meta = campaign.reached_meta + total_item_value + float(donation_value)
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
         else:
             # Se for só Itens, soma a quantidade no reached_meta (ou não, depende da sua lógica)
