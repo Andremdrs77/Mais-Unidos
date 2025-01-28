@@ -70,7 +70,10 @@ def login_and_register():
                         name=name, 
                         email=email, 
                         telephone=telephone, 
-                        password=hashed_password
+                        password=hashed_password,
+                        itemDonations=0,
+                        valueDonations=0,
+                        engagedCampaigns=0
                     )
                     return redirect(url_for('index'))
         
@@ -80,7 +83,7 @@ def login_and_register():
     # Se for GET, não exibe erro nenhum (errors vazio) e não força nenhum formulário ativo
     return render_template('login_register.html', errors={}, active_form=None)
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 @login_required
 def index():
     # 1. Obter TODAS as campanhas

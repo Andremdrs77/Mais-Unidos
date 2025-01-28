@@ -9,7 +9,10 @@ CREATE TABLE tb_users (
     usr_email VARCHAR(255) NOT NULL,
     usr_telephone VARCHAR(20) NOT NULL,
     usr_password TEXT NOT NULL,
-    usr_createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    usr_createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usr_itemDonations INT DEFAULT 0,
+    usr_valueDonations DECIMAL(10,2) DEFAULT 0,
+    usr_engagedCampaigns INT DEFAULT 0
 );
 
 -- Tabela de Campanhas
