@@ -86,65 +86,83 @@ def login_and_register():
 @app.route('/')
 @login_required
 def index():
-    # 1. Obter TODAS as campanhas
-    campaigns = Campaign.get_all()
+    most_recent = Campaign.get_by_recents()
 
-    # 2. Verificar se há parâmetro de busca na URL, ex.: ?q=algumaCoisa
+    most_successful = Campaign.get_by_sucess()
+
+    top_donors = Donation.get_top_donors()
+
     query = request.args.get('q', '')  # 'q' é o nome do parâmetro
     if query:
-        # Filtrar localmente (comparando título e descrição)
+        # Filtrar localmente (comparando título e descrição) para ambas as listas
         query_lower = query.lower()
-        filtered = []
-        for camp in campaigns:
-            if (query_lower in camp.title.lower()) or (query_lower in camp.description.lower()):
-                filtered.append(camp)
-        campaigns = filtered
+        most_recent = [
+            camp for camp in most_recent
+            if query_lower in camp.title.lower() or query_lower in camp.description.lower()
+        ]
+        most_successful = [
+            camp for camp in most_successful
+            if query_lower in camp.title.lower() or query_lower in camp.description.lower()
+        ]
 
-    # 3. Montar a lista campaigns_data (igual ao seu código atual)
-    campaigns_data = []
-    for campaign in campaigns:
-        user = User.get(campaign.usr_id)
-        user_name = user.name if user else "Usuário desconhecido"
+    # 4. Função para montar a lista campaigns_data
+    def prepare_campaigns_data(campaigns):
+        campaigns_data = []
+        for campaign in campaigns:
+            user = User.get(campaign.usr_id)
+            user_name = user.name if user else "Usuário desconhecido"
 
-        progress = (campaign.reached_meta / campaign.meta_value * 100) if campaign.meta_value > 0 else 0
+            progress = (campaign.reached_meta / campaign.meta_value * 100) if campaign.meta_value > 0 else 0
 
-        # Se a meta foi atingida, atualizar status
-        if progress >= 100 and campaign.status != "Concluída":
-            campaign.status = "Concluída"
-            Campaign.update(campaign.id, status="Concluída")
+            # Se a meta foi atingida, atualizar status
+            if progress >= 100 and campaign.status != "Concluída":
+                campaign.status = "Concluída"
+                Campaign.update(campaign.id, status="Concluída")
 
-        visual_progress = min(progress, 100)
-        created_at = campaign.created_at.strftime('%d/%m/%Y %H:%M:%S') if campaign.created_at else "Data não disponível"
-        deadline = campaign.deadline.strftime('%d/%m/%Y') if campaign.deadline else "Prazo não definido"
+            visual_progress = min(progress, 100)
+            created_at = campaign.created_at.strftime('%d/%m/%Y %H:%M:%S') if campaign.created_at else "Data não disponível"
+            deadline = campaign.deadline.strftime('%d/%m/%Y') if campaign.deadline else "Prazo não definido"
 
-        if campaign.tipo == "Financeiro":
-            meta = f"R$ {campaign.meta_value:.2f}"
-        elif campaign.tipo == "Itens":
-            items_data = Item.get_by_campaign(campaign.id)
-            meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
-        elif campaign.tipo == "Itens e Financeiro":
-            items_data = Item.get_by_campaign(campaign.id)
-            item_meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
-            meta = f"{item_meta} ou R$ {campaign.meta_value:.2f}"
-        else:
-            meta = "Meta não definida"
+            if campaign.tipo == "Financeiro":
+                meta = f"R$ {campaign.meta_value:.2f}"
+            elif campaign.tipo == "Itens":
+                items_data = Item.get_by_campaign(campaign.id)
+                meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
+            elif campaign.tipo == "Itens e Financeiro":
+                items_data = Item.get_by_campaign(campaign.id)
+                item_meta = ", ".join([f"{item['quantity']} {item['name']}" for item in items_data])
+                meta = f"{item_meta} ou R$ {campaign.meta_value:.2f}"
+            else:
+                meta = "Meta não definida"
 
-        campaigns_data.append({
-            "id": campaign.id,
-            "title": campaign.title,
-            "description": campaign.description,
-            "tipo": campaign.tipo,
-            "status": campaign.status,
-            "created_at": created_at,
-            "user_name": user_name,
-            "deadline": deadline,
-            "meta": meta,
-            "progress": progress,
-            "visual_progress": visual_progress
-        })
+            campaigns_data.append({
+                "id": campaign.id,
+                "title": campaign.title,
+                "description": campaign.description,
+                "tipo": campaign.tipo,
+                "status": campaign.status,
+                "created_at": created_at,
+                "user_name": user_name,
+                "deadline": deadline,
+                "meta": meta,
+                "progress": progress,
+                "visual_progress": visual_progress
+            })
+        return campaigns_data
 
-    # 4. Renderizar o template, passando também o "query" para manter no input
-    return render_template('index.html', campaigns=campaigns_data, search_term=query)
+    # 5. Preparar dados para as duas categorias
+    most_recent_data = prepare_campaigns_data(most_recent)
+    most_successful_data = prepare_campaigns_data(most_successful)
+
+    # 6. Renderizar o template, passando ambas as listas e o termo de busca
+    return render_template(
+        'index.html',
+        most_recent=most_recent_data,
+        most_successful=most_successful_data,
+        top_donors=top_donors,
+        search_term=query
+    )
+
 
 @app.route('/profile')
 @login_required

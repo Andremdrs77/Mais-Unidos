@@ -201,6 +201,210 @@
         }
     }
 </style>
+
+<style>
+    .button-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-button {
+        padding: 11px;
+        border: none;
+        border-radius: 5px;
+        background-color: #0d2329;
+        color: white;
+        cursor: pointer;
+    }
+
+    .filter-button i {
+        margin-right: 5px;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown button {
+        padding: 11px;
+        border: none;
+        border-radius: 5px;
+        background-color: #0d2329;
+        color: white;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #ffffff;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .dropdown-content button {
+        padding: 10px;
+        width: 100%;
+        border: none;
+        background-color: #fff;
+        color: #0d2329;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .dropdown-content button:hover {
+        background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Estilo da seção de filtros */
+    .filter-section {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-row {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-row label {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .filter-row input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .apply-filter-button {
+        padding: 10px 20px;
+        background-color: #0d2329;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        align-self: center;
+    }
+
+    .apply-filter-button:hover {
+        background-color: #092022;
+    }
+
+
+
+    @media (max-width: 768px) {
+        .button-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .filter-button,
+        .dropdown button {
+            width: 100%;
+        }
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-row {
+            width: 100%;
+        }
+
+        .apply-filter-button {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+
+    #top-donors-container {
+        margin: 20px auto;
+        padding: 20px;
+        max-width: 90%;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-container {
+    margin: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse; /* Garante que as bordas internas se fundam */
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: center; /* Centraliza o texto */
+        border: 1px solid #ddd; /* Adiciona bordas internas nas células */
+    }
+
+    th {
+        background-color: #05664f;
+        color: white;
+        font-size: 16px;
+    }
+
+    td {
+        color: #555;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    table thead th {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+
+
+
+
+</style>
 {% endblock %}
 
 {% block content %}
@@ -216,26 +420,46 @@
            name="q" 
            placeholder="Pesquisar campanhas..." 
            value="{{ search_term|default('') }}">
-    <div class="dropdown" id="period-dropdown">
-        <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
-        <div class="dropdown-content">
-            <button data-period="7" type="button">Últimos 7 dias</button>
-            <button data-period="30" type="button">Últimos 30 dias</button>
-            <button data-period="60" type="button">Últimos 60 dias</button>
-            <button data-period="90" type="button">Últimos 90 dias</button>
+    <div class="button-group">
+        <div class="dropdown" id="period-dropdown">
+            <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
+            <div class="dropdown-content">
+                <button data-period="7" type="button">Últimos 7 dias</button>
+                <button data-period="30" type="button">Últimos 30 dias</button>
+                <button data-period="60" type="button">Últimos 60 dias</button>
+                <button data-period="90" type="button">Últimos 90 dias</button>
+            </div>
         </div>
+        <button type="button" id="filter-button" class="filter-button">
+            <i class="fa fa-filter"></i> Filtros
+        </button>
     </div>
 </form>
+
+<div id="filter-section" class="filter-section" style="display: none;">
+    <div class="filter-row">
+        <label for="start-date">Data de Início:</label>
+        <input type="date" id="start-date" name="start_date">
+    </div>
+    <div class="filter-row">
+        <label for="end-date">Data de Fim:</label>
+        <input type="date" id="end-date" name="end_date">
+    </div>
+    <button type="submit" class="apply-filter-button">Aplicar Filtros</button>
+</div>
+
 
 <div class="tabs">
     <div class="tab-buttons">
         <button class="active" id="all-campaigns">TODAS AS CAMPANHAS</button>
         <button id="top-campaigns">CAMPANHAS MAIS BEM-SUCEDIDAS</button>
+        <button id="top-donors">TOP 10 DOADORES</button>
     </div>
 </div>
 
-<div id="campaign-container" class="campaign-container">
-    {% for campaign in campaigns %}
+<!-- Container para as "Todas as campanhas" -->
+<div id="all-campaigns-container" class="campaign-container">
+    {% for campaign in most_recent %}
     <div class="campaign-card">
         <h3>{{ campaign.title }}</h3>
         <p><strong>Descrição:</strong> {{ campaign.description }}</p>
@@ -258,24 +482,82 @@
     {% endfor %}
 </div>
 
+<!-- Container para as "Campanhas mais bem-sucedidas" -->
+<div id="top-campaigns-container" class="campaign-container" style="display: none;">
+    {% for campaign in most_successful %}
+    <div class="campaign-card">
+        <h3>{{ campaign.title }}</h3>
+        <p><strong>Descrição:</strong> {{ campaign.description }}</p>
+        <p><strong>Tipo:</strong> {{ campaign.tipo }}</p>
+        <p><strong>Status:</strong> {{ campaign.status }}</p>
+        <p><strong>Criado em:</strong> {{ campaign.created_at }}</p>
+        <p><strong>Criador:</strong> {{ campaign.user_name }}</p>
+        <p><strong>Prazo:</strong> {{ campaign.deadline }}</p>
+        <p><strong>Meta:</strong> {{ campaign.meta }}</p>
+        <p><strong>Progresso:</strong></p>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ campaign.visual_progress }}%;">
+                {{ campaign.visual_progress|round(1) }}%
+            </div>
+        </div>
+        <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
+            <button class="donate-button">Doar</button>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Container para os "Top 10 Doadores" -->
+<div id="top-donors-container" class="campaign-container" style="display: none;">
+    <table class="campaign-card">
+        <thead>
+            <tr>
+                <th>Top</th>
+                <th>ID do Usuário</th>
+                <th>Nome</th>
+                <th>Total Doado (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for donor in top_donors %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ donor.user_id }}</td>
+                <td>{{ donor.user_name }}</td>
+                <td>{{ donor.total_donated }}</td>             
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 <script>
+    // Trocar entre as campanhas quando as abas forem clicadas
     document.getElementById('top-campaigns').addEventListener('click', function () {
-        document.getElementById('period-dropdown').style.display = 'block';
+        document.getElementById('top-campaigns-container').style.display = 'flex';
+        document.getElementById('all-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'none';
         this.classList.add('active');
         document.getElementById('all-campaigns').classList.remove('active');
+        document.getElementById('top-donors').classList.remove('active');
     });
 
     document.getElementById('all-campaigns').addEventListener('click', function () {
-        document.getElementById('period-dropdown').style.display = 'block';
+        document.getElementById('all-campaigns-container').style.display = 'flex';
+        document.getElementById('top-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'none';
         this.classList.add('active');
         document.getElementById('top-campaigns').classList.remove('active');
+        document.getElementById('top-donors').classList.remove('active');
     });
 
-    document.querySelectorAll('.dropdown-content button').forEach(button => {
-        button.addEventListener('click', function () {
-            const period = this.getAttribute('data-period');
-            alert(`Filtrar campanhas por período: Últimos ${period} dias`);
-        });
+    document.getElementById('top-donors').addEventListener('click', function () {
+        document.getElementById('all-campaigns-container').style.display = 'none';
+        document.getElementById('top-campaigns-container').style.display = 'none';
+        document.getElementById('top-donors-container').style.display = 'flex';
+        this.classList.add('active');
+        document.getElementById('all-campaigns').classList.remove('active');
+        document.getElementById('top-campaigns').classList.remove('active');
     });
 </script>
 
