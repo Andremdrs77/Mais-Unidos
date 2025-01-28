@@ -623,6 +623,14 @@
     }
     }
 
+    document.getElementById('filter-button').addEventListener('click', function () {
+        const filterSection = document.getElementById('filter-section');
+        if (filterSection.style.display === 'none') {
+            filterSection.style.display = 'block';
+        } else {
+            filterSection.style.display = 'none';
+        }
+    });
 
 </script>
 
