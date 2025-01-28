@@ -102,6 +102,24 @@ class Item:
                 "campaign_id": result[5]
             }
         return None
+    
+    @staticmethod
+    def create(name, quantity, campaign_id, value=None):
+        """Cria um novo item no banco de dados."""
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        # Ajuste os nomes de colunas conforme seu schema REAL:
+        cursor.execute(
+            """
+            INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (name, quantity, campaign_id, value)
+        )
+        conexao.commit()
+        new_id = cursor.lastrowid
+        conexao.close()
+        return new_id
 
     @staticmethod
     def update_quantity(item_id, new_quantity):
@@ -111,8 +129,13 @@ class Item:
         conexao.commit()
         conexao.close()
 
-
-
+    @staticmethod
+    def delete_by_campaign(campaign_id):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        cursor.execute("DELETE FROM tb_items WHERE itm_cam_id = %s", (campaign_id,))
+        conexao.commit()
+        conexao.close()
 class Campaign:
     def __init__(self, id, title, description, deadline, meta_value, reached_meta, tipo, status, created_at, deleted_at, usr_id):
         self.id = id
@@ -138,6 +161,23 @@ class Campaign:
         if result:
             return Campaign(*result)
         return None
+    
+    @staticmethod
+    def search_by_title_or_description(user_id, query):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = "SELECT * FROM tb_campaigns WHERE cam_usr_id = %s AND (cam_title LIKE %s OR cam_description LIKE %s)"
+        like_query = f"%{query}%"
+        cursor.execute(sql, (user_id, like_query, like_query))
+        results = cursor.fetchall()
+        conexao.close()
+
+        campaigns = []
+        for row in results:
+            # row deve ter 11 campos
+            campaigns.append(Campaign(*row))
+
+        return campaigns
 
     @staticmethod
     def create(title, description, deadline, meta_value, tipo, usr_id):
@@ -199,6 +239,23 @@ class Campaign:
         cursor.execute("DELETE FROM tb_campaigns WHERE cam_id = %s", (campaign_id,))
         conexao.commit()
         conexao.close()
+    
+    @staticmethod
+    def get_by_user(user_id):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT * FROM tb_campaigns WHERE cam_usr_id = %s", (user_id,))
+        results = cursor.fetchall()
+        conexao.close()
+
+        return [
+            Campaign(
+                cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            )
+            for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
+        ]
 
     @staticmethod
     def get_all():
@@ -221,3 +278,46 @@ class Campaign:
 
     def is_active(self):
         return self.status == "ativa"
+
+class Donation:
+    def __init__(self, dnt_id, dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt):
+        self.id = dnt_id
+        self.user_id = dnt_usr_id
+        self.campaign_id = dnt_cam_id
+        self.value = dnt_value
+        self.created_at = dnt_createdAt
+
+    @staticmethod
+    def create(user_id, campaign_id, value):
+        """Insere uma nova doação (financeira) na tabela tb_donations."""
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        # Ajuste nomes de colunas conforme seu schema
+        sql = """
+            INSERT INTO tb_donations (dnt_usr_id, dnt_cam_id, dnt_value)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(sql, (user_id, campaign_id, value))
+        conexao.commit()
+        conexao.close()
+
+    @staticmethod
+    def get_by_user(user_id):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            SELECT dnt_id, dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt
+            FROM tb_donations
+            WHERE dnt_usr_id = %s
+            ORDER BY dnt_createdAt DESC
+        """
+        cursor.execute(sql, (user_id,))
+        results = cursor.fetchall()
+        conexao.close()
+
+        donations = []
+        for row in results:
+            donation = Donation(*row)
+            donations.append(donation)
+        return donations
+

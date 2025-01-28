@@ -1,107 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %} Minhas campanhas {% endblock %}
-
-{% block titlePage %} Minhas campanhas {% endblock %}
+{% block title %}Minhas campanhas{% endblock %}
+{% block titlePage %}Minhas campanhas{% endblock %}
 
 {% block style %}
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-    /* Nova animação para o botão (efeito de pulso) */
-    .side-item.animated-active {
-        animation: buttonPulse 0.4s forwards;
-    }
-
-    @keyframes buttonPulse {
-        0% {
-            transform: scale(1);
-            background-color: #e3e9f7;
-            /* Cor inicial */
-        }
-
-        50% {
-            transform: scale(1.1);
-            /* Efeito de zoom */
-            background-color: #35525a;
-            /* Cor intermediária */
-        }
-
-        100% {
-            transform: scale(1);
-            /* Volta ao tamanho original */
-            background-color: #0d2329;
-            /* Cor final */
-        }
-    }
-
-    body.modal-open {
-        overflow: hidden;
-    }
-
-    .campaign-container {
+    .search-bar {
+        width: 100%;
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
-        justify-content: space-between;
-    }
-
-    .campaign-card {
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        background-color: #f9f9f9;
-        box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
-        flex: 1 1 calc(33.333% - 20px);
-        box-sizing: border-box;
-    }
-
-    .campaign-card h3 {
-        margin-bottom: 10px;
-        color: #05664f;
-    }
-
-    .campaign-card p {
-        margin: 5px 0;
-        color: #555;
-    }
-
-    .campaign-card .edit-button {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #05664f;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .campaign-card .edit-button:hover {
-        background-color: #044f3b;
-    }
-
-    #create-campaign-button {
-        padding: 10px 20px;
-        background-color: #0d2329;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-bottom: 20px;
-    }
-
-    #create-campaign-button:hover {
-        background-color: #08161a;
-    }
-
-    .search-bar {
-        display: flex;
         gap: 10px;
-        margin-bottom: 20px;
         align-items: center;
-        height: 50px;
     }
 
     .search-bar input {
@@ -113,6 +23,7 @@
 
     .search-bar .dropdown {
         position: relative;
+        width: auto;
     }
 
     .search-bar .dropdown button {
@@ -122,10 +33,7 @@
         background-color: #0d2329;
         color: #fff;
         cursor: pointer;
-    }
-
-    .search-bar .dropdown button:hover {
-        background-color: #08161a;
+        text-align: center;
     }
 
     .search-bar .dropdown-content {
@@ -133,9 +41,10 @@
         position: absolute;
         top: 100%;
         left: 0;
-        background-color: #fff;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        background-color: #ffffff;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
         z-index: 1;
+        width: 100%;
         border-radius: 5px;
     }
 
@@ -156,56 +65,252 @@
     .search-bar .dropdown:hover .dropdown-content {
         display: block;
     }
+
+    .tabs {
+        display: flex;
+        justify-content: space-between;
+        margin: 2% 0;
+        width: 100%;
+    }
+
+    .tabs .tab-buttons {
+        display: flex;
+        gap: 0;
+        width: 100%;
+    }
+
+    .tabs .tab-buttons button {
+        flex: 1;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-size: 14px;
+        font-weight: bold;
+        color: #b0b0b0;
+        cursor: pointer;
+        position: relative;
+        padding-bottom: 5px;
+    }
+
+    .tabs .tab-buttons button.active {
+        color: #05664f;
+    }
+
+    .tabs .tab-buttons button.active:after {
+        content: '';
+        display: block;
+        height: 3px;
+        width: 100%;
+        background-color: #05664f;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    .campaign-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+    }
+
+    .campaign-card {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+        box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+        flex: 1 1 calc(33.333% - 20px);
+        box-sizing: border-box;
+    }
+
+    .campaign-card h3 {
+        margin-bottom: 10px;
+        color: #05664f;
+    }
+
+    .campaign-card p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .campaign-card .progress-bar {
+        margin-top: 10px;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .campaign-card .progress-bar .progress {
+        height: 100%;
+        background-color: #05664f;
+        text-align: center;
+        color: #fff;
+        line-height: 20px;
+        width: 0%;
+    }
+
+    #create-campaign-button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #0d2329;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+
+    #create-campaign-button:hover {
+        background-color: #08161a;
+    }
+
+    .campaign-card .donate-button {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #05664f;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .campaign-card .donate-button:hover {
+        background-color: #044f3b;
+    }
+
+    /* Botão para editar (caso queira permitir edição) */
+    .campaign-card .edit-button {
+        margin-top: 10px;
+        margin-right: 5px;
+        padding: 10px;
+        background-color: #FFA500; /* Laranja */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .campaign-card .edit-button:hover {
+        background-color: #cc8400;
+    }
+
+    @media (max-width: 768px) {
+        .tabs .tab-buttons button {
+            font-size: 12px;
+        }
+
+        .search-bar {
+            flex-direction: column;
+        }
+
+        .search-bar input {
+            width: 100%;
+            margin-bottom: 3%;
+        }
+
+        .search-bar .dropdown {
+            width: 100%;
+            margin-bottom: 5%;
+        }
+
+        .tabs {
+            margin-bottom: 10%;
+        }
+        .campaign-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
     
+        .campaign-card {
+            flex: 1 1 100%; 
+            max-width: 100%;
+        }
+    }
 </style>
 
 {% endblock %}
 
 {% block content %}
-
-<div class="search-bar">
-    <input type="text" id="search-input" placeholder="Pesquisar campanhas...">
+<!-- Form de busca via GET -->
+<form class="search-bar" method="GET" action="{{ url_for('campaign') }}">
+    <!-- O campo tem name="q", para que ao submeter o form, envie ?q=... -->
+    <input type="text" id="search-input" name="q" placeholder="Pesquisar minhas campanhas..."
+           value="{{ search_term or '' }}">
+    
     <div class="dropdown" id="period-dropdown">
-        <button>Selecionar período <i class="fa fa-chevron-down"></i></button>
+        <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
         <div class="dropdown-content">
-            <button data-period="7">Últimos 7 dias</button>
-            <button data-period="30">Últimos 30 dias</button>
-            <button data-period="60">Últimos 60 dias</button>
-            <button data-period="90">Últimos 90 dias</button>
+            <button data-period="7" type="button">Últimos 7 dias</button>
+            <button data-period="30" type="button">Últimos 30 dias</button>
+            <button data-period="60" type="button">Últimos 60 dias</button>
+            <button data-period="90" type="button">Últimos 90 dias</button>
         </div>
     </div>
-</div>
+</form>
 
 <a href="/create-campaign"><button id="create-campaign-button">Criar Campanha</button></a>
 
-<div id="campaign-container" class="campaign-container">
-    <div class="campaign-card">
-        <h3>Título da Campanha</h3>
-        <p><strong>Descrição:</strong> Esta é uma breve descrição da campanha.</p>
-        <p><strong>Meta:</strong> R$ 10.000</p>
-        <p><strong>Prazo:</strong> 30/01/2025</p>
-        <p><strong>Status:</strong> Ativa</p>
-        <button class="edit-button">Editar Campanha</button>
+<!-- Se quiser tabs, mantenha seu HTML -->
+<div class="tabs">
+    <div class="tab-buttons">
+        <button class="active" id="all-campaigns">MINHAS CAMPANHAS</button>
+        <button id="top-campaigns">CAMPANHAS MAIS BEM-SUCEDIDAS (MEUS RANKS?)</button>
     </div>
 </div>
 
+<div id="campaign-container" class="campaign-container">
+    {% for campaign in campaigns %}
+    <div class="campaign-card">
+        <h3>{{ campaign.title }}</h3>
+        <p><strong>Descrição:</strong> {{ campaign.description }}</p>
+        <p><strong>Tipo:</strong> {{ campaign.tipo }}</p>
+        <p><strong>Status:</strong> {{ campaign.status }}</p>
+        <p><strong>Criado em:</strong> {{ campaign.created_at }}</p>
+        <p><strong>Prazo:</strong> {{ campaign.deadline }}</p>
+        <p><strong>Meta:</strong> {{ campaign.meta }}</p>
+        <p><strong>Progresso:</strong></p>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ campaign.visual_progress }}%;">
+                {{ campaign.visual_progress|round(1) }}%
+            </div>
+        </div>
+
+        <!-- Botões (Editar/Doar) -->
+        <a href="{{ url_for('edit_campaign', campaign_id=campaign.id) }}">
+          <button class="edit-button">Editar</button>
+        </a>
+        <a href="{{ url_for('make_donations', campaign_id=campaign.id) }}">
+          <button class="donate-button">Doar</button>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const createCampaignButton = document.getElementById('create-campaign-button');
+    // Exemplo de comportamento dos botões da tabs
+    document.getElementById('top-campaigns').addEventListener('click', function () {
+        document.getElementById('period-dropdown').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('all-campaigns').classList.remove('active');
+    });
 
-        createCampaignButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Evita redirecionamento imediato
+    document.getElementById('all-campaigns').addEventListener('click', function () {
+        document.getElementById('period-dropdown').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('top-campaigns').classList.remove('active');
+    });
 
-            // Adiciona a classe de animação à página
-            main.classList.add('fade-out');
-
-            // Redireciona após o fim da animação
-            setTimeout(() => {
-                window.location.href = createCampaignButton.parentElement.getAttribute('href');
-            }, 500); // Correspondendo à duração da animação
+    document.querySelectorAll('.dropdown-content button').forEach(button => {
+        button.addEventListener('click', function () {
+            const period = this.getAttribute('data-period');
+            alert(`Filtrar minhas campanhas por período: Últimos ${period} dias`);
         });
     });
 </script>
-
 
 {% endblock %}

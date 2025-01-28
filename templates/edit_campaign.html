@@ -764,54 +764,96 @@
     </header>
 
     <main class="fade-in">
-
         <div class="form-container">
-
-            <form id="create-campaign-form" name="createCampaign" method="POST" action="{{ url_for('create_campaign') }}">
+            <!-- Note que a action deve chamar a rota edit_campaign com o ID da campanha -->
+            <form id="edit-campaign-form" name="editCampaign" method="POST" action="{{ url_for('edit_campaign', campaign_id=campaign.id) }}">
+                
                 <div class="form-group">
                     <label for="title">Título da Campanha</label>
-                    <input type="text" id="title" name="title" placeholder="Digite o título da campanha" required>
+                    <!-- value com o título da campanha -->
+                    <input type="text" id="title" name="title" placeholder="Digite o título da campanha"
+                           value="{{ campaign.title }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="description">Descrição</label>
-                    <textarea id="description" name="description" placeholder="Digite a descrição da campanha"
-                        required></textarea>
+                    <textarea id="description" name="description" placeholder="Digite a descrição da campanha" required>{{ campaign.description }}</textarea>
                 </div>
 
+                <!-- Radio group para o tipo de meta -->
                 <div class="radio-group">
-                    <input type="radio" name="goalType" value="financial" id="financial-goal" checked required>
+                    <!-- Se 'Financeiro' checado -->
+                    <input type="radio" name="goalType" value="financial" id="financial-goal" 
+                           {% if campaign.tipo == 'Financeiro' %} checked {% endif %} required>
                     <label for="financial-goal">Meta Financeira</label>
 
-                    <input type="radio" name="goalType" value="items" id="items-goal">
+                    <input type="radio" name="goalType" value="items" id="items-goal"
+                           {% if campaign.tipo == 'Itens' %} checked {% endif %}>
                     <label for="items-goal">Meta de Itens</label>
 
-                    <input type="radio" name="goalType" value="items-financial" id="items-financial-goal">
+                    <input type="radio" name="goalType" value="items-financial" id="items-financial-goal"
+                           {% if campaign.tipo == 'Itens e Financeiro' %} checked {% endif %}>
                     <label for="items-financial-goal">Meta de Itens e Financeira</label>
                 </div>
 
+                <!-- Campo da meta financeira -->
                 <div class="form-group" id="financial-goal-input">
-                    <input type="number" id="financial-input" name="financialGoal" placeholder="Digite a meta em R$"
-                        step="0.01" min="0">
+                    <!-- Se for Financeiro, exibe meta_value como valor. Caso seja outro tipo, exibimos 0 ou nada -->
+                    <input type="number" id="financial-input" name="financialGoal"
+                           placeholder="Digite a meta em R$"
+                           step="0.01" min="0"
+                           value="{% if campaign.tipo == 'Financeiro' %}{{ campaign.meta_value }}{% else %}0{% endif %}">
                 </div>
 
+                <!-- Meta de itens -->
                 <div class="form-group" id="items-goal-input" style="display: none;">
                     <div id="items-list" class="item-list">
+                        <!-- Se a campanha for 'Itens', mostramos os itens -->
+                        {% if campaign.tipo == 'Itens' %}
+                            {% for item in items %}
+                            <div class="item-row">
+                                <input type="text" name="itemName[]" placeholder="Nome do item" value="{{ item['name'] }}" required>
+                                <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" value="{{ item['quantity'] }}" required>
+                                <button type="button" class="remove-button">x</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Caso não seja 'Itens', podemos deixar vazio -->
+                            <div class="item-row">
+                                <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                                <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                                <button type="button" class="remove-button">x</button>
+                            </div>
+                        {% endif %}
+
                         <div class="item-row">
-                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
-                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
                             <button type="button" id="add-item-button" class="add-button">+</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Meta de itens e financeiro -->
                 <div class="form-group" id="items-financial-goal-input" style="display: none;">
                     <div id="items-financial-list" class="item-list">
+                        {% if campaign.tipo == 'Itens e Financeiro' %}
+                            {% for item in items %}
+                            <div class="item-row">
+                                <input type="text" name="itemName[]" placeholder="Nome do item" value="{{ item['name'] }}" required>
+                                <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" value="{{ item['quantity'] }}" required>
+                                <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" value="{{ item['value'] or 0 }}" required>
+                                <button type="button" class="remove-button">x</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="item-row">
+                                <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                                <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                                <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" required>
+                                <button type="button" class="remove-button">x</button>
+                            </div>
+                        {% endif %}
+
                         <div class="item-row">
-                            <input type="text" name="itemName[]" placeholder="Nome do item" required>
-                            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
-                            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01"
-                                min="0" required>
                             <button type="button" id="add-item-financial-button" class="add-button">+</button>
                         </div>
                     </div>
@@ -819,107 +861,122 @@
 
                 <div class="form-group">
                     <label for="deadline">Prazo</label>
-                    <input type="date" id="deadline" name="deadline" required>
+                    <!-- Converter data no formato certo, se necessário -->
+                    <input type="date" 
+                        id="deadline" 
+                        name="deadline"
+                        value="{{ campaign.deadline.strftime('%Y-%m-%d') if campaign.deadline else '' }}" 
+                        required>
+
                 </div>
 
-                <button type="submit" class="submit-button">Editar campanha</button>
+                <button type="submit" class="submit-button">Salvar alterações</button>
             </form>
         </div>
-
-
     </main>
 
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const financialGoalInput = document.getElementById('financial-goal-input');
-    const itemsGoalInput = document.getElementById('items-goal-input');
-    const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
-    const financialRadio = document.getElementById('financial-goal');
-    const itemsRadio = document.getElementById('items-goal');
-    const itemsFinancialRadio = document.getElementById('items-financial-goal');
-    const addItemButton = document.getElementById('add-item-button');
-    const itemsList = document.getElementById('items-list');
-    const addItemFinancialButton = document.getElementById('add-item-financial-button');
-    const itemsFinancialList = document.getElementById('items-financial-list');
-
-    // Função para esconder e desativar todos os inputs de metas
-    function hideAllGoalInputs() {
-        // Esconder todos os grupos de inputs
-        financialGoalInput.style.display = 'none';
-        itemsGoalInput.style.display = 'none';
-        itemsFinancialGoalInput.style.display = 'none';
-
-        // Desativar inputs de todas as metas
-        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
-        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
-        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = true);
-    }
-
-    // Alternar para meta financeira
-    financialRadio.addEventListener('change', () => {
-        hideAllGoalInputs();
-        financialGoalInput.style.display = 'block';
-        financialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
-    });
-
-    // Alternar para meta de itens
-    itemsRadio.addEventListener('change', () => {
-        hideAllGoalInputs();
-        itemsGoalInput.style.display = 'block';
-        itemsGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
-    });
-
-    // Alternar para meta de itens e financeira
-    itemsFinancialRadio.addEventListener('change', () => {
-        hideAllGoalInputs();
-        itemsFinancialGoalInput.style.display = 'block';
-        itemsFinancialGoalInput.querySelectorAll('input').forEach(input => input.disabled = false);
-    });
-
-    // Adicionar novos itens para meta de itens
-    addItemButton.addEventListener('click', () => {
-        const itemRow = document.createElement('div');
-        itemRow.className = 'item-row';
-
-        itemRow.innerHTML = `
-            <input type="text" name="itemName[]" placeholder="Nome do item" required>
-            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
-            <button type="button" class="remove-button">x</button>
-        `;
-
-        const removeButton = itemRow.querySelector('.remove-button');
-        removeButton.addEventListener('click', () => {
-            itemsList.removeChild(itemRow);
+        // ================== Mesmo JS da criação, porém adaptado ===================
+        document.addEventListener('DOMContentLoaded', () => {
+            const financialGoalInput = document.getElementById('financial-goal-input');
+            const itemsGoalInput = document.getElementById('items-goal-input');
+            const itemsFinancialGoalInput = document.getElementById('items-financial-goal-input');
+            const financialRadio = document.getElementById('financial-goal');
+            const itemsRadio = document.getElementById('items-goal');
+            const itemsFinancialRadio = document.getElementById('items-financial-goal');
+    
+            // Função para esconder e desativar todos os inputs de metas
+            function hideAllGoalInputs() {
+                financialGoalInput.style.display = 'none';
+                itemsGoalInput.style.display = 'none';
+                itemsFinancialGoalInput.style.display = 'none';
+    
+                financialGoalInput.querySelectorAll('input').forEach(i => i.disabled = true);
+                itemsGoalInput.querySelectorAll('input').forEach(i => i.disabled = true);
+                itemsFinancialGoalInput.querySelectorAll('input').forEach(i => i.disabled = true);
+            }
+    
+            // Alternar para meta financeira
+            financialRadio.addEventListener('change', () => {
+                hideAllGoalInputs();
+                financialGoalInput.style.display = 'block';
+                financialGoalInput.querySelectorAll('input').forEach(i => i.disabled = false);
+            });
+    
+            // Alternar para meta de itens
+            itemsRadio.addEventListener('change', () => {
+                hideAllGoalInputs();
+                itemsGoalInput.style.display = 'block';
+                itemsGoalInput.querySelectorAll('input').forEach(i => i.disabled = false);
+            });
+    
+            // Alternar para meta de itens e financeira
+            itemsFinancialRadio.addEventListener('change', () => {
+                hideAllGoalInputs();
+                itemsFinancialGoalInput.style.display = 'block';
+                itemsFinancialGoalInput.querySelectorAll('input').forEach(i => i.disabled = false);
+            });
+    
+            // ================== Botões de adicionar linhas ===================
+            const itemsList = document.getElementById('items-list');
+            const addItemButton = document.getElementById('add-item-button');
+            if (addItemButton) {
+                addItemButton.addEventListener('click', () => {
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'item-row';
+                    itemRow.innerHTML = `
+                        <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                        <button type="button" class="remove-button">x</button>
+                    `;
+                    const removeButton = itemRow.querySelector('.remove-button');
+                    removeButton.addEventListener('click', () => {
+                        itemsList.removeChild(itemRow);
+                    });
+                    itemsList.appendChild(itemRow);
+                });
+            }
+    
+            const itemsFinancialList = document.getElementById('items-financial-list');
+            const addItemFinancialButton = document.getElementById('add-item-financial-button');
+            if (addItemFinancialButton) {
+                addItemFinancialButton.addEventListener('click', () => {
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'item-row';
+                    itemRow.innerHTML = `
+                        <input type="text" name="itemName[]" placeholder="Nome do item" required>
+                        <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
+                        <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" required>
+                        <button type="button" class="remove-button">x</button>
+                    `;
+                    const removeButton = itemRow.querySelector('.remove-button');
+                    removeButton.addEventListener('click', () => {
+                        itemsFinancialList.removeChild(itemRow);
+                    });
+                    itemsFinancialList.appendChild(itemRow);
+                });
+            }
+    
+            // ================== Remover itens existentes ===================
+            // Cada item-row existente tem botão "x"
+            document.querySelectorAll('.item-row .remove-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentNode.parentNode.removeChild(this.parentNode);
+                });
+            });
+    
+            // ================== Inicializar estado ===================
+            function initRadio() {
+                if (financialRadio.checked) {
+                    financialRadio.dispatchEvent(new Event('change'));
+                } else if (itemsRadio.checked) {
+                    itemsRadio.dispatchEvent(new Event('change'));
+                } else if (itemsFinancialRadio.checked) {
+                    itemsFinancialRadio.dispatchEvent(new Event('change'));
+                }
+            }
+            initRadio();
         });
-
-        itemsList.appendChild(itemRow);
-    });
-
-    // Adicionar novos itens para meta de itens e financeira
-    addItemFinancialButton.addEventListener('click', () => {
-        const itemRow = document.createElement('div');
-        itemRow.className = 'item-row';
-
-        itemRow.innerHTML = `
-            <input type="text" name="itemName[]" placeholder="Nome do item" required>
-            <input type="number" name="itemQuantity[]" placeholder="Quantidade" min="1" required>
-            <input type="number" name="itemValue[]" placeholder="Valor unitário (R$)" step="0.01" min="0" required>
-            <button type="button" class="remove-button">x</button>
-        `;
-
-        const removeButton = itemRow.querySelector('.remove-button');
-        removeButton.addEventListener('click', () => {
-            itemsFinancialList.removeChild(itemRow);
-        });
-
-        itemsFinancialList.appendChild(itemRow);
-    });
-
-    // Inicializar estado padrão (meta financeira ativa)
-    financialRadio.dispatchEvent(new Event('change'));
-});
-
-
     </script>
 
     <script>
