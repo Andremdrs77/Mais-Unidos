@@ -86,26 +86,25 @@ def login_and_register():
 @login_required
 def index():
     most_recent = Campaign.get_by_recents()
-
     most_successful = Campaign.get_by_sucess()
-
     top_donors = Donation.get_top_donors()
     top_item_donors = Donation.get_top_donors_items()
 
     query = request.args.get('q', '')  # 'q' é o nome do parâmetro
     if query:
-        # Filtrar localmente (comparando título e descrição) para ambas as listas
+        # Filtrar campanhas por qualquer atributo que contenha o termo de busca
         query_lower = query.lower()
-        most_recent = [
-            camp for camp in most_recent
-            if query_lower in camp.title.lower() or query_lower in camp.description.lower()
-        ]
-        most_successful = [
-            camp for camp in most_successful
-            if query_lower in camp.title.lower() or query_lower in camp.description.lower()
-        ]
 
-    # 4. Função para montar a lista campaigns_data
+        def matches_query(campaign):
+            for attr in vars(campaign).values():  # Itera sobre os valores dos atributos do objeto
+                if attr and query_lower in str(attr).lower():
+                    return True
+            return False
+
+        most_recent = [camp for camp in most_recent if matches_query(camp)]
+        most_successful = [camp for camp in most_successful if matches_query(camp)]
+
+    # Função para montar a lista campaigns_data
     def prepare_campaigns_data(campaigns):
         campaigns_data = []
         for campaign in campaigns:
@@ -150,11 +149,11 @@ def index():
             })
         return campaigns_data
 
-    # 5. Preparar dados para as duas categorias
+    # Preparar dados para as duas categorias
     most_recent_data = prepare_campaigns_data(most_recent)
     most_successful_data = prepare_campaigns_data(most_successful)
 
-    # 6. Renderizar o template, passando ambas as listas e o termo de busca
+    # Renderizar o template, passando ambas as listas e o termo de busca
     return render_template(
         'index.html',
         most_recent=most_recent_data,
@@ -163,6 +162,7 @@ def index():
         top_item_donors=top_item_donors,
         search_term=query
     )
+
 
 @app.route('/delete-campaign/<int:campaign_id>', methods=['POST'])
 @login_required
@@ -193,15 +193,22 @@ def profile():
 @login_required
 def campaign():
     user_id = current_user.id
-    # Buscar somente as campanhas do usuário logado
+    # Buscar campanhas do usuário logado
     campaigns = Campaign.get_by_user(user_id)
 
     # --- PARÂMETRO DE BUSCA ---
     query = request.args.get('q', '')  # 'q' é o nome do parâmetro de busca
     if query:
-        campaigns = Campaign.search_by_title_or_description(user_id, query)
-    else:
-        campaigns = Campaign.get_by_user(user_id)
+        # Filtrar campanhas por qualquer atributo que contenha o termo de busca
+        query_lower = query.lower()
+
+        def matches_query(campaign):
+            for attr in vars(campaign).values():  # Itera sobre os valores dos atributos do objeto
+                if attr and query_lower in str(attr).lower():
+                    return True
+            return False
+
+        campaigns = [camp for camp in campaigns if matches_query(camp)]
 
     # Função para montar a lista de dados das campanhas
     def prepare_campaigns_data(campaigns):
@@ -244,20 +251,27 @@ def campaign():
             })
         return campaigns_data
 
-    most_recent = Campaign.get_by_recents_from_user(user_id) 
-    most_recent_data = prepare_campaigns_data(most_recent)
+    # Buscar campanhas recentes e bem-sucedidas do usuário
+    most_recent = Campaign.get_by_recents_from_user(user_id)
+    most_successful = Campaign.get_by_success_from_user(user_id)
 
-    most_successful = Campaign.get_by_success_from_user(user_id) 
+    # Aplicar o filtro de busca também nas listas de campanhas recentes e bem-sucedidas
+    if query:
+        most_recent = [camp for camp in most_recent if matches_query(camp)]
+        most_successful = [camp for camp in most_successful if matches_query(camp)]
+
+    # Preparar dados para exibição
+    campaigns_data = prepare_campaigns_data(campaigns)
+    most_recent_data = prepare_campaigns_data(most_recent)
     most_successful_data = prepare_campaigns_data(most_successful)
 
     return render_template(
         'campaign.html',
-        campaigns=prepare_campaigns_data(campaigns),
+        campaigns=campaigns_data,
         most_recent=most_recent_data,
-        most_successful=most_successful_data,  
-        search_term=query  
+        most_successful=most_successful_data,
+        search_term=query
     )
-
 
 @app.route('/create-campaign', methods=['GET', 'POST'])
 @login_required
@@ -303,7 +317,6 @@ def create_campaign():
         return redirect(url_for('campaign'))
 
     return render_template('create_campaign.html')
-
 
 @app.route('/edit-campaign/<int:campaign_id>', methods=['GET', 'POST'])
 @login_required
@@ -565,7 +578,7 @@ def process_donation():
     donation_id = None
 
     # 2. Lógica de doação financeira, se donation_value foi enviado
-    if donation_value:
+    if donation_value and donation_value.strip():  # Verifica se donation_value não é vazio
         try:
             val = float(donation_value)
         except ValueError:
@@ -613,10 +626,12 @@ def process_donation():
         if campaign.tipo == "Itens e Financeiro":
             item_val_unit = item_data['value'] or 0
             total_item_value = item_val_unit * item_quantity
-            new_reached_meta = campaign.reached_meta + total_item_value + float(donation_value)
+            # Considera o valor financeiro somente se donation_value for válido
+            donation_value_float = float(donation_value) if donation_value and donation_value.strip() else 0
+            new_reached_meta = campaign.reached_meta + total_item_value + donation_value_float
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
         else:
-            # Se for só Itens, soma a quantidade no reached_meta (ou não, depende da sua lógica)
+            # Se for só Itens, soma a quantidade no reached_meta
             new_reached_meta = campaign.reached_meta + item_quantity
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
 
@@ -626,6 +641,7 @@ def process_donation():
         return redirect(url_for('make_donations', campaign_id=campaign_id))
 
     return redirect(url_for('donations'))
+
 
 @app.route('/settings')
 @login_required
