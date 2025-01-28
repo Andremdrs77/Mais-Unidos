@@ -390,17 +390,17 @@ class Campaign:
         ]
     
     @staticmethod
-    def get_by_sucess_from_user(user_id):
+    def get_by_recents_from_user(user_id):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        
+
         cursor.execute("""
         SELECT cam_id, cam_title, cam_description, cam_deadline, cam_meta,
-        cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
         FROM tb_campaigns
-        WHERE cam_meta > 0 AND cam_usr_id = %s
-        ORDER BY (cam_reachedMeta / cam_meta * 100) DESC
-        """)
+        WHERE cam_usr_id = %s
+        ORDER BY cam_createdAt DESC
+        """, (user_id,))  # Usando %s para o MySQL Connector
 
         results = cursor.fetchall()
         conexao.close()
@@ -413,6 +413,35 @@ class Campaign:
             for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
                 cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
         ]
+
+
+    
+    @staticmethod
+    def get_by_success_from_user(user_id):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+        SELECT cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+            cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+        FROM tb_campaigns
+        WHERE cam_meta > 0 AND cam_usr_id = %s
+        ORDER BY (cam_reachedMeta / cam_meta * 100) DESC
+        """, (user_id,))  # Usando %s para o MySQL Connector
+
+        results = cursor.fetchall()
+        conexao.close()
+
+        return [
+            Campaign(
+                cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id
+            )
+            for cam_id, cam_title, cam_description, cam_deadline, cam_meta,
+                cam_reachedMeta, cam_tipo, cam_status, cam_createdAt, cam_deletedAt, cam_usr_id in results
+        ]
+
+
         
 
 
