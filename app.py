@@ -395,14 +395,24 @@ def doar_itens():
     item = Item.get(item_id)
     if item:
         new_item_reached = item['reached_quantity'] + item_quantity
-        # se new_item_reached > item['quantity']: ...
+        if new_item_reached > item['quantity']:
+            new_item_reached = item['quantity']
         Item.update_quantity(item_id, new_item_reached)
 
-    # Atualiza reached_meta da campanha (se vc soma itens na meta)
     camp = Campaign.get(campaign_id)
     if camp:
-        new_reached_meta = camp.reached_meta + item_quantity  # ou conversão
-        Campaign.update(campaign_id, reached_meta=new_reached_meta)
+        # Se a campanha for "Itens e Financeiro", calcule o valor total 
+        # do item doado (item['value'] * item_quantity) e some à meta
+        if camp.tipo == "Itens e Financeiro":
+            # Se o item tiver 'value' != None:
+            item_val_unit = item['value'] or 0
+            total_item_value = item_val_unit * item_quantity
+            new_reached_meta = camp.reached_meta + total_item_value
+            Campaign.update(campaign_id, reached_meta=new_reached_meta)
+        else:
+            # Campanha só de itens => soma item_quantity mesmo (se quiser)
+            new_reached_meta = camp.reached_meta + item_quantity
+            Campaign.update(campaign_id, reached_meta=new_reached_meta)
 
     flash("Doação de itens registrada!", "success")
     return redirect(url_for('donations'))
@@ -532,15 +542,13 @@ def process_donation():
             flash("Quantidade de item inválida!", "danger")
             return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-        # Se ainda não criamos uma doação principal, cria agora (sem valor).
         if donation_id is None:
             donation_id = Donation.create(
                 user_id=current_user.id,
                 campaign_id=campaign_id,
-                donation_value=None  # indica doação de itens
+                donation_value=None  # doação de itens
             )
 
-        # Agora criar pivot em 'tb_donation_items'
         DonationItem.create(donation_id, item_id, item_quantity)
 
         # Atualizar contagem do item
@@ -548,14 +556,19 @@ def process_donation():
         if item_data:
             new_item_reached = item_data['reached_quantity'] + item_quantity
             if new_item_reached > item_data['quantity']:
-                new_item_reached = item_data['quantity']  # não ultrapassar meta do item
+                new_item_reached = item_data['quantity']
             Item.update_quantity(item_id, new_item_reached)
 
-        # Atualiza reached_meta da campanha (se quiser somar itens na meta)
-        new_reached_meta = campaign.reached_meta + item_quantity
-        Campaign.update(campaign_id, reached_meta=new_reached_meta)
-
-        flash("Doação de itens realizada com sucesso!", "success")
+        # Se a campanha for "Itens e Financeiro", soma o valor do item no reached_meta
+        if campaign.tipo == "Itens e Financeiro":
+            item_val_unit = item_data['value'] or 0
+            total_item_value = item_val_unit * item_quantity
+            new_reached_meta = campaign.reached_meta + total_item_value
+            Campaign.update(campaign_id, reached_meta=new_reached_meta)
+        else:
+            # Se for só Itens, soma a quantidade no reached_meta (ou não, depende da sua lógica)
+            new_reached_meta = campaign.reached_meta + item_quantity
+            Campaign.update(campaign_id, reached_meta=new_reached_meta)
 
     # 4. Se usuário não enviou nem donation_value nem item_id, não doou nada
     if not donation_value and not item_id:
