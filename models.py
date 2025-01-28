@@ -398,6 +398,33 @@ class Donation:
             })
         return top_donors
 
+    @staticmethod
+    def get_top_donors_items(limit=10):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        sql = """
+            SELECT usr_id, usr_name, SUM(dni_quantity) AS total_items_donated
+            FROM tb_donation_items
+            JOIN tb_donations ON dnt_id = dni_dnt_id
+            JOIN tb_users ON usr_id = dnt_usr_id
+            GROUP BY usr_id
+            HAVING total_items_donated > 0
+            ORDER BY total_items_donated DESC
+            LIMIT %s
+        """
+        cursor.execute(sql, (limit,))
+        rows = cursor.fetchall()
+        conexao.close()
+
+        top_donors = []
+        for row in rows:
+            user_id, user_name, total_items_donated = row
+            top_donors.append({
+                'user_id': user_id,
+                'user_name': user_name,
+                'total_items_donated': total_items_donated
+            })
+        return top_donors
 
 
 class DonationItem:

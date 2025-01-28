@@ -91,6 +91,7 @@ def index():
     most_successful = Campaign.get_by_sucess()
 
     top_donors = Donation.get_top_donors()
+    top_item_donors = Donation.get_top_donors_items()
 
     query = request.args.get('q', '')  # 'q' é o nome do parâmetro
     if query:
@@ -159,7 +160,8 @@ def index():
         'index.html',
         most_recent=most_recent_data,
         most_successful=most_successful_data,
-        top_donors=top_donors,
+        top_money_donors=top_donors,
+        top_item_donors=top_item_donors,
         search_term=query
     )
 
