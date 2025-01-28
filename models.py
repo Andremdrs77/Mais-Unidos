@@ -400,7 +400,7 @@ class Campaign:
         FROM tb_campaigns
         WHERE cam_usr_id = %s
         ORDER BY cam_createdAt DESC
-        """, (user_id,))  # Usando %s para o MySQL Connector
+        """, (user_id,))
 
         results = cursor.fetchall()
         conexao.close()
@@ -427,7 +427,7 @@ class Campaign:
         FROM tb_campaigns
         WHERE cam_meta > 0 AND cam_usr_id = %s
         ORDER BY (cam_reachedMeta / cam_meta * 100) DESC
-        """, (user_id,))  # Usando %s para o MySQL Connector
+        """, (user_id,)) 
 
         results = cursor.fetchall()
         conexao.close()

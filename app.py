@@ -244,21 +244,18 @@ def campaign():
             })
         return campaigns_data
 
-    # 1. Preparar os dados para as campanhas recentes
-    most_recent = Campaign.get_by_recents_from_user(user_id)  # Pegue as campanhas mais recentes
+    most_recent = Campaign.get_by_recents_from_user(user_id) 
     most_recent_data = prepare_campaigns_data(most_recent)
 
-    # 2. Preparar os dados para as campanhas mais sucedidas
-    most_successful = Campaign.get_by_success_from_user(user_id)  # Pegue as campanhas mais sucedidas
+    most_successful = Campaign.get_by_success_from_user(user_id) 
     most_successful_data = prepare_campaigns_data(most_successful)
 
-    # Renderiza o template e passa as variáveis
     return render_template(
         'campaign.html',
         campaigns=prepare_campaigns_data(campaigns),
-        most_recent=most_recent_data,  # Passando as campanhas recentes
-        most_successful=most_successful_data,  # Passando as campanhas mais sucedidas
-        search_term=query  # Passando o termo de busca para o input
+        most_recent=most_recent_data,
+        most_successful=most_successful_data,  
+        search_term=query  
     )
 
 
