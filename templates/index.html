@@ -198,8 +198,8 @@
         }
 
         .campaign-card {
-            flex: 1 1 100%; /* O cartão ocupa 100% da largura em telas pequenas */
-            max-width: 100%; /* Garante que o cartão não ultrapasse a largura */
+            flex: 1 1 100%;
+            max-width: 100%;
         }
     }
 </style>
@@ -268,7 +268,6 @@
         display: block;
     }
 
-    /* Estilo da seção de filtros */
     .filter-section {
         margin-top: 20px;
         padding: 20px;
@@ -374,13 +373,13 @@
 
     table {
         width: 100%;
-        border-collapse: collapse; /* Garante que as bordas internas se fundam */
+        border-collapse: collapse;
     }
 
     th, td {
         padding: 12px;
-        text-align: center; /* Centraliza o texto */
-        border: 1px solid #ddd; /* Adiciona bordas internas nas células */
+        text-align: center;
+        border: 1px solid #ddd;
     }
 
     th {
@@ -416,8 +415,8 @@
     }
 
     .donors-list table {
-        width: 100%;  /* A tabela ocupará 100% do tamanho do container */
-        table-layout: fixed;  /* Isso ajuda a manter uma distribuição uniforme das colunas */
+        width: 100%;
+        table-layout: fixed;
     }
 
 
@@ -426,12 +425,6 @@
 
 {% block content %}
 
-<!-- 
-    Exemplo de "form" GET para buscar. 
-    - name="q" => cria ?q=textoDeBusca
-    - value="{{ search_term or '' }}" => exibe no input o que foi pesquisado 
-      (caso queira manter após a busca). Se não estiver usando 'search_term', remova. 
--->
 <form class="search-bar" method="GET" action="{{ url_for('index') }}">
     <input type="text" 
            name="q" 
@@ -447,7 +440,6 @@
     </div>
 </div>
 
-<!-- Container para as "Todas as campanhas" -->
 <div id="all-campaigns-container" class="campaign-container">
     {% for campaign in most_recent %}
     <div class="campaign-card">
@@ -472,7 +464,6 @@
     {% endfor %}
 </div>
 
-<!-- Container para as "Campanhas mais bem-sucedidas" -->
 <div id="top-campaigns-container" class="campaign-container" style="display: none;">
     {% for campaign in most_successful %}
     <div class="campaign-card">
@@ -497,7 +488,6 @@
     {% endfor %}
 </div>
 
-<!-- Container para os "Top Doadores" -->
 <div id="top-donors-container" class="campaign-container">
     <div class="dropdown" id="period-dropdown">
         <button type="button">Selecionar categoria<i class="fa fa-chevron-down"></i></button>
@@ -507,7 +497,6 @@
         </div>
     </div>
 
-    <!-- Container para "Top Doadores de Itens" -->
     <div id="items-top-donors" class="donors-list">
       <table class="campaign-card">
         <thead>
@@ -532,7 +521,6 @@
       </table>
     </div>
   
-    <!-- Container para "Top Doadores de Dinheiro" -->
     <div id="money-top-donors" class="donors-list" style="display: none;">
       <table class="campaign-card">
         <thead>
@@ -559,7 +547,6 @@
 </div>
 
 <script>
-    // Trocar entre as campanhas quando as abas forem clicadas
     document.getElementById('top-campaigns').addEventListener('click', function () {
         document.getElementById('top-campaigns-container').style.display = 'flex';
         document.getElementById('all-campaigns-container').style.display = 'none';
@@ -588,7 +575,6 @@
     });
 
     function switchTab(type) {
-    // Esconde ambos os containers
     const itemsTab = document.getElementById('items-top-donors');
     const moneyTab = document.getElementById('money-top-donors');
     

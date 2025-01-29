@@ -20,34 +20,29 @@ def load_user(user_id):
 
 @app.route('/loginandregister', methods=['GET', 'POST'])
 def login_and_register():
-    errors = {}         # Armazena erros específicos de cada campo
-    active_form = None  # Indica qual form deve estar ativo (login ou register)
+    errors = {}
+    active_form = None
     
     if request.method == 'POST':
         action = request.form.get('action')
 
         if action == 'login':
-            active_form = 'login'  # Indica que estamos tratando o login
+            active_form = 'login'
             
             email = request.form['l_email']
             senha = request.form['l_password']
             user = User.get_by_email(email)
 
-            # Verifica se o usuário existe
             if not user:
-                # Mostra erro específico no campo de e-mail de login
                 errors['l_email'] = 'E-mail não cadastrado!'
-            # Se existe, verifica se a senha está correta
             elif not check_password_hash(user.password, senha):
-                # Mostra erro específico no campo de senha de login
                 errors['l_password'] = 'Senha incorreta!'
             else:
-                # Login bem-sucedido: redireciona
                 login_user(user)
                 return redirect(url_for('index'))
 
         elif action == 'register':
-            active_form = 'register'  # Indica que estamos tratando o registro
+            active_form = 'register'
             
             name = request.form['r_name']
             email = request.form['r_email']
@@ -55,16 +50,13 @@ def login_and_register():
             password = request.form['r_password']
             confirm_password = request.form['r_confirmpassword']
 
-            # Verifica se as senhas batem
             if password != confirm_password:
                 errors['r_confirmpassword'] = 'As senhas não coincidem!'
             else:
-                # Verifica se já existe um usuário com esse email
                 existing_user = User.get_by_email(email)
                 if existing_user:
                     errors['r_email'] = 'Este e-mail já está cadastrado!'
                 else:
-                    # Cria o usuário e redireciona
                     hashed_password = generate_password_hash(password)
                     User.create(
                         name=name, 
@@ -76,10 +68,8 @@ def login_and_register():
                     )
                     return redirect(url_for('index'))
         
-        # Se chegamos até aqui, houve algum erro => renderiza o template mostrando os erros
         return render_template('login_register.html', errors=errors, active_form=active_form)
     
-    # Se for GET, não exibe erro nenhum (errors vazio) e não força nenhum formulário ativo
     return render_template('login_register.html', errors={}, active_form=None)
 
 @app.route('/')
@@ -90,13 +80,12 @@ def index():
     top_donors = Donation.get_top_donors()
     top_item_donors = Donation.get_top_donors_items()
 
-    query = request.args.get('q', '')  # 'q' é o nome do parâmetro
+    query = request.args.get('q', '')
     if query:
-        # Filtrar campanhas por qualquer atributo que contenha o termo de busca
         query_lower = query.lower()
 
         def matches_query(campaign):
-            for attr in vars(campaign).values():  # Itera sobre os valores dos atributos do objeto
+            for attr in vars(campaign).values():
                 if attr and query_lower in str(attr).lower():
                     return True
             return False
@@ -104,7 +93,6 @@ def index():
         most_recent = [camp for camp in most_recent if matches_query(camp)]
         most_successful = [camp for camp in most_successful if matches_query(camp)]
 
-    # Função para montar a lista campaigns_data
     def prepare_campaigns_data(campaigns):
         campaigns_data = []
         for campaign in campaigns:
@@ -113,7 +101,6 @@ def index():
 
             progress = (campaign.reached_meta / campaign.meta_value * 100) if campaign.meta_value > 0 else 0
 
-            # Se a meta foi atingida, atualizar status
             if progress >= 100 and campaign.status != "Concluída":
                 campaign.status = "Concluída"
                 Campaign.update(campaign.id, status="Concluída")
@@ -149,11 +136,9 @@ def index():
             })
         return campaigns_data
 
-    # Preparar dados para as duas categorias
     most_recent_data = prepare_campaigns_data(most_recent)
     most_successful_data = prepare_campaigns_data(most_successful)
 
-    # Renderizar o template, passando ambas as listas e o termo de busca
     return render_template(
         'index.html',
         most_recent=most_recent_data,
@@ -167,18 +152,15 @@ def index():
 @app.route('/delete-campaign/<int:campaign_id>', methods=['POST'])
 @login_required
 def delete_campaign(campaign_id):
-    # 1. Buscar a campanha no banco
     campaign = Campaign.get(campaign_id)
     if not campaign:
         flash("Campanha não encontrada.", "danger")
         return redirect(url_for('campaign'))
 
-    # 2. Verificar se o usuário atual é dono da campanha (boa prática de segurança)
     if campaign.usr_id != current_user.id:
         flash("Você não tem permissão para excluir esta campanha.", "danger")
         return redirect(url_for('campaign'))
 
-    # 3. Executar a exclusão (isso chamará o DELETE na base de dados)
     Campaign.delete(campaign_id)
 
     flash("Campanha excluída com sucesso!", "success")
@@ -193,24 +175,20 @@ def profile():
 @login_required
 def campaign():
     user_id = current_user.id
-    # Buscar campanhas do usuário logado
     campaigns = Campaign.get_by_user(user_id)
 
-    # --- PARÂMETRO DE BUSCA ---
-    query = request.args.get('q', '')  # 'q' é o nome do parâmetro de busca
+    query = request.args.get('q', '')
     if query:
-        # Filtrar campanhas por qualquer atributo que contenha o termo de busca
         query_lower = query.lower()
 
         def matches_query(campaign):
-            for attr in vars(campaign).values():  # Itera sobre os valores dos atributos do objeto
+            for attr in vars(campaign).values():
                 if attr and query_lower in str(attr).lower():
                     return True
             return False
 
         campaigns = [camp for camp in campaigns if matches_query(camp)]
 
-    # Função para montar a lista de dados das campanhas
     def prepare_campaigns_data(campaigns):
         campaigns_data = []
         for campaign_obj in campaigns:
@@ -251,16 +229,13 @@ def campaign():
             })
         return campaigns_data
 
-    # Buscar campanhas recentes e bem-sucedidas do usuário
     most_recent = Campaign.get_by_recents_from_user(user_id)
     most_successful = Campaign.get_by_success_from_user(user_id)
 
-    # Aplicar o filtro de busca também nas listas de campanhas recentes e bem-sucedidas
     if query:
         most_recent = [camp for camp in most_recent if matches_query(camp)]
         most_successful = [camp for camp in most_successful if matches_query(camp)]
 
-    # Preparar dados para exibição
     campaigns_data = prepare_campaigns_data(campaigns)
     most_recent_data = prepare_campaigns_data(most_recent)
     most_successful_data = prepare_campaigns_data(most_successful)
@@ -321,45 +296,36 @@ def create_campaign():
 @app.route('/edit-campaign/<int:campaign_id>', methods=['GET', 'POST'])
 @login_required
 def edit_campaign(campaign_id):
-    # 1. Buscar a campanha no banco
     campaign = Campaign.get(campaign_id)
     if not campaign:
         flash("Campanha não encontrada.", "danger")
         return redirect(url_for('campaign'))
 
-    # (Opcional) Verifica se o usuário atual é dono da campanha
     if campaign.usr_id != current_user.id:
         flash("Você não tem permissão para editar esta campanha.", "danger")
         return redirect(url_for('campaign'))
 
-    # 2. Se for GET, apenas preenche o formulário com os dados existentes
     if request.method == 'GET':
-        # Se a campanha for do tipo "Itens" ou "Itens e Financeiro", buscamos seus itens
         items = []
         if campaign.tipo in ["Itens", "Itens e Financeiro"]:
-            items = Item.get_by_campaign(campaign_id)  # Retorna lista de dicionários ou objetos
+            items = Item.get_by_campaign(campaign_id)
 
         return render_template('edit_campaign.html', campaign=campaign, items=items)
 
-    # 3. Se for POST, processamos as alterações
     if request.method == 'POST':
         title = request.form['title']
         description = request.form['description']
         deadline = request.form['deadline']
         goalType = request.form['goalType']
 
-        # Atualiza parte principal da campanha
-        # Precisamos de meta_value. Se for financeiro, vem de 'financialGoal'; se for itens, soma dos itens, etc.
-        meta_value = campaign.meta_value  # Valor original, se quiser
+        meta_value = campaign.meta_value
 
-        # Vamos redefinir a meta de acordo com o type
         if goalType == 'financial':
             meta_value = float(request.form.get('financialGoal', 0.0))
             tipo = 'Financeiro'
 
         elif goalType == 'items':
             tipo = 'Itens'
-            # Soma das quantidades (ou zero) — depende da sua lógica
             itemQuantities = request.form.getlist('itemQuantity[]')
             meta_value = sum(int(q) for q in itemQuantities) if itemQuantities else 0
 
@@ -368,11 +334,9 @@ def edit_campaign(campaign_id):
             itemQuantities = request.form.getlist('itemQuantity[]')
             itemValues = request.form.getlist('itemValue[]')
             meta_value = 0
-            # Por exemplo: soma (quantidade * valor unitário)
             for q, v in zip(itemQuantities, itemValues):
                 meta_value += float(q) * float(v)
 
-        # 4. Atualizar a tabela tb_campaigns
         Campaign.update(
             campaign_id,
             title=title,
@@ -382,27 +346,22 @@ def edit_campaign(campaign_id):
             tipo=tipo
         )
 
-        # 5. Atualizar itens (se for "Itens" ou "Itens e Financeiro")
-        # Estratégia simples: deleta os antigos e recria
         if tipo in ['Itens', 'Itens e Financeiro']:
-            # Apaga todos os itens antigos
             Item.delete_by_campaign(campaign_id)
 
             itemNames = request.form.getlist('itemName[]')
             itemQuantities = request.form.getlist('itemQuantity[]')
 
             if tipo == 'Itens':
-                # Simples: sem valor unitário
                 for name, qty in zip(itemNames, itemQuantities):
                     Item.create(name, int(qty), campaign_id)
             else:
-                # Tipo = 'Itens e Financeiro': tem itemValue[]
                 itemValues = request.form.getlist('itemValue[]')
                 for name, qty, val in zip(itemNames, itemQuantities, itemValues):
                     Item.create(name, int(qty), campaign_id, float(val))
 
         flash("Campanha atualizada com sucesso!", "success")
-        return redirect(url_for('campaign'))  # Ou para 'my_campaigns', etc.
+        return redirect(url_for('campaign'))
 
 @app.route('/doar_financeiro', methods=['POST'])
 @login_required
@@ -415,14 +374,12 @@ def doar_financeiro():
         flash("Valor inválido.", "danger")
         return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-    # Cria registro em tb_donations
     donation_id = Donation.create(
         user_id=current_user.id,
         campaign_id=campaign_id,
         donation_value=donation_value
     )
 
-    # Atualiza meta na campanha
     camp = Campaign.get(campaign_id)
     if camp:
         new_reached = camp.reached_meta + donation_value
@@ -444,17 +401,14 @@ def doar_itens():
         flash("Quantidade inválida", "danger")
         return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-    # 1. Criar doação (sem valor)
     donation_id = Donation.create(
         user_id=current_user.id,
         campaign_id=campaign_id,
-        donation_value=None  # Indica que é itens
+        donation_value=None
     )
 
-    # 2. Criar pivot (doação-itens)
     DonationItem.create(donation_id, item_id, item_quantity)
 
-    # 3. Atualizar contagem do item e a meta da campanha
     item = Item.get(item_id)
     if item:
         new_item_reached = item['reached_quantity'] + item_quantity
@@ -464,16 +418,12 @@ def doar_itens():
 
     camp = Campaign.get(campaign_id)
     if camp:
-        # Se a campanha for "Itens e Financeiro", calcule o valor total 
-        # do item doado (item['value'] * item_quantity) e some à meta
         if camp.tipo == "Itens e Financeiro":
-            # Se o item tiver 'value' != None:
             item_val_unit = item['value'] or 0
             total_item_value = item_val_unit * item_quantity
             new_reached_meta = camp.reached_meta + total_item_value
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
         else:
-            # Campanha só de itens => soma item_quantity mesmo (se quiser)
             new_reached_meta = camp.reached_meta + item_quantity
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
 
@@ -486,59 +436,44 @@ def donations():
     user_id = current_user.id
     donations_list = Donation.get_by_user(user_id)
 
-    # Filtro de busca (opcional)
     query = request.args.get('q', '')
     if query:
-        # Se quiser filtrar localmente ...
-        # Exemplo simples (pode adaptar)
         query_lower = query.lower()
         filtered = []
         for d in donations_list:
-            # Montar string para comparar
             combined = f"{d.value or ''}"
-            # se tiver DonationItem, busque e concatene também
             filtered.append(d)
         donations_list = filtered
 
     donations_data = []
     for d in donations_list:
-        # Buscar nome da campanha
         camp = Campaign.get(d.campaign_id)
         campaign_name = camp.title if camp else "Campanha desconhecida"
 
-        # Montar a string final "valor_quantidade"
-        # 1) Verifica se doação tem valor (d.value)
         donation_value_str = ""
         if d.value is not None:
             donation_value_str = f"R$ {d.value:.2f}"
 
-        # 2) Verifica se doação tem itens via DonationItem (pivô)
-        donation_items = DonationItem.get_by_donation(d.id)  # lista de itemPivot
+        donation_items = DonationItem.get_by_donation(d.id)
         items_str = ""
         if donation_items:
             partials = []
             for di in donation_items:
-                # di.item_id e di.quantity
-                item_info = Item.get(di.item_id)  # Ex.: {"name": "Arroz", ...}
+                item_info = Item.get(di.item_id)
                 partials.append(f"{di.quantity} x {item_info['name']}")
             items_str = ", ".join(partials)
 
-        # 3) Unificar em uma string final
-        #    Se tiver valor e itens => "R$ 50,00 / 3 x Arroz"
-        #    Se só valor => "R$ 50,00"
-        #    Se só itens => "3 x Arroz"
         if donation_value_str and items_str:
             valor_quantidade = donation_value_str + " / " + items_str
         else:
             valor_quantidade = donation_value_str or items_str or ""
 
-        # Formatar data
         date_str = d.created_at.strftime("%d/%m/%Y") if d.created_at else "N/A"
 
         donations_data.append({
             "id": d.id,
             "campaign_name": campaign_name,
-            "donation_value": valor_quantidade,  # campo unificado
+            "donation_value": valor_quantidade,
             "date": date_str
         })
 
@@ -555,7 +490,6 @@ def make_donations(campaign_id):
     if not campaign:
         return "Campanha não encontrada", 404
 
-    # Buscar os itens da campanha, se aplicável
     items = Item.get_by_campaign(campaign_id) if campaign.tipo in ["Itens", "Itens e Financeiro"] else []
 
     return render_template('make_donations.html', campaign=campaign, items=items)
@@ -564,40 +498,34 @@ def make_donations(campaign_id):
 @login_required
 def process_donation():
     campaign_id = request.form.get('campaign_id')
-    donation_value = request.form.get('donation_value')  # se for dinheiro
-    item_id = request.form.get('item_id')               # se for itens
-    item_quantity = request.form.get('item_quantity')   # se for itens
+    donation_value = request.form.get('donation_value')
+    item_id = request.form.get('item_id')
+    item_quantity = request.form.get('item_quantity')
 
-    # 1. Verificar se a campanha existe
     campaign = Campaign.get(campaign_id)
     if not campaign:
         flash("Campanha não encontrada.", "danger")
         return redirect(url_for('index'))
 
-    # GUARDA O ID DA DOAÇÃO PRINCIPAL (caso façamos 1 ou 2 doações)
     donation_id = None
 
-    # 2. Lógica de doação financeira, se donation_value foi enviado
-    if donation_value and donation_value.strip():  # Verifica se donation_value não é vazio
+    if donation_value and donation_value.strip():
         try:
             val = float(donation_value)
         except ValueError:
             flash("Valor inválido!", "danger")
             return redirect(url_for('make_donations', campaign_id=campaign_id))
 
-        # Cria registro principal em 'tb_donations' com dnt_value=val
         donation_id = Donation.create(
             user_id=current_user.id,
             campaign_id=campaign_id,
             donation_value=val
         )
 
-        # Atualizar reached_meta
         new_reached = campaign.reached_meta + val
         Campaign.update(campaign_id, reached_meta=new_reached)
         flash("Doação financeira realizada com sucesso!", "success")
 
-    # 3. Lógica de doação de itens, se item_id e item_quantity foram enviados
     if item_id and item_quantity:
         try:
             item_quantity = int(item_quantity)
@@ -609,12 +537,11 @@ def process_donation():
             donation_id = Donation.create(
                 user_id=current_user.id,
                 campaign_id=campaign_id,
-                donation_value=None  # doação de itens
+                donation_value=None
             )
 
         DonationItem.create(donation_id, item_id, item_quantity)
 
-        # Atualizar contagem do item
         item_data = Item.get(item_id)
         if item_data:
             new_item_reached = item_data['reached_quantity'] + item_quantity
@@ -622,20 +549,16 @@ def process_donation():
                 new_item_reached = item_data['quantity']
             Item.update_quantity(item_id, new_item_reached)
 
-        # Se a campanha for "Itens e Financeiro", soma o valor do item no reached_meta
         if campaign.tipo == "Itens e Financeiro":
             item_val_unit = item_data['value'] or 0
             total_item_value = item_val_unit * item_quantity
-            # Considera o valor financeiro somente se donation_value for válido
             donation_value_float = float(donation_value) if donation_value and donation_value.strip() else 0
             new_reached_meta = campaign.reached_meta + total_item_value + donation_value_float
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
         else:
-            # Se for só Itens, soma a quantidade no reached_meta
             new_reached_meta = campaign.reached_meta + item_quantity
             Campaign.update(campaign_id, reached_meta=new_reached_meta)
 
-    # 4. Se usuário não enviou nem donation_value nem item_id, não doou nada
     if not donation_value and not item_id:
         flash("Nenhuma informação de doação fornecida!", "danger")
         return redirect(url_for('make_donations', campaign_id=campaign_id))

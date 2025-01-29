@@ -82,7 +82,6 @@ class User(UserMixin):
     def get_activeCampaigns(self):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        # Corrigir a consulta SQL
         sql = "SELECT COUNT(DISTINCT cam_id) FROM tb_campaigns WHERE cam_usr_id = %s and cam_status = 'ativa'"
         cursor.execute(sql, (self.id,))
         result = cursor.fetchone()
@@ -92,7 +91,6 @@ class User(UserMixin):
     def get_engagedCampaigns(self):
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        # Corrigir a consulta SQL
         sql = "SELECT COUNT(DISTINCT dnt_cam_id) FROM tb_donations WHERE dnt_usr_id = %s"
         cursor.execute(sql, (self.id,))
         result = cursor.fetchone()
@@ -167,7 +165,6 @@ class Item:
         """Cria um novo item no banco de dados."""
         conexao = obter_conexao()
         cursor = conexao.cursor()
-        # Ajuste os nomes de colunas conforme seu schema REAL:
         cursor.execute(
             """
             INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value)
@@ -247,7 +244,6 @@ class Campaign:
 
         campaigns = []
         for row in results:
-            # row deve ter 11 campos
             campaigns.append(Campaign(*row))
 
         return campaigns
@@ -454,7 +450,7 @@ class Donation:
         self.id = dnt_id
         self.user_id = dnt_usr_id
         self.campaign_id = dnt_cam_id
-        self.value = dnt_value        # Se != None => é doação financeira
+        self.value = dnt_value       
         self.created_at = dnt_createdAt
 
     @staticmethod
@@ -468,7 +464,7 @@ class Donation:
         """
         cursor.execute(sql, (user_id, campaign_id, donation_value))
         conexao.commit()
-        new_id = cursor.lastrowid  # Precisaremos do ID gerado se formos adicionar items
+        new_id = cursor.lastrowid 
         conexao.close()
         return new_id
 
@@ -488,7 +484,6 @@ class Donation:
 
         donations = []
         for row in rows:
-            # row = (dnt_id, dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt)
             donation = Donation(*row)
             donations.append(donation)
         return donations
@@ -585,6 +580,5 @@ class DonationItem:
 
         donation_items = []
         for row in rows:
-            # row = (dni_id, dni_dnt_id, dni_item_id, dni_quantity)
             donation_items.append(DonationItem(*row))
         return donation_items
