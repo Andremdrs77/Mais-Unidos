@@ -10,25 +10,23 @@ def obter_conexao():
     )   
 
 class User(UserMixin):
-    def __init__(self, id, name, email, telephone, password, created_at, itemDonationsTotal, valueDonationsTotal):
+    def __init__(self, id, name, email, telephone, password, created_at, itemDonationsTotal, valueDonationsTotal, user_type):
         self.id = id
         self.name = name
         self.email = email
         self.telephone = telephone
         self.password = password
         self.created_at = created_at.strftime('%d/%m/%Y') if created_at else "Data não disponível"
-
-        # Exibir nas informações do perfil
         self.itemDonationsTotal = itemDonationsTotal
         self.valueDonationsTotal = valueDonationsTotal
+        self.user_type = user_type
+
         self.get_major_donation()
         self.get_valueDonationsTotal()
         self.get_totalContributions()
         self.get_engagedCampaigns()
         self.get_activeCampaigns()
         self.averagePerCampaign = self.valueDonationsTotal / self.engagedCampaigns if self.engagedCampaigns > 0 and self.valueDonationsTotal > 0 else 0
-
-
 
     @staticmethod
     def get(user_id):
@@ -38,7 +36,7 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
         return None
 
     @staticmethod
@@ -49,7 +47,7 @@ class User(UserMixin):
         result = cursor.fetchone()
         conexao.close()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
+            return User(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
         return None
     
     def get_major_donation(self):        
@@ -98,12 +96,12 @@ class User(UserMixin):
         self.engagedCampaigns = result[0] if result and result[0] is not None else 0
 
     @staticmethod
-    def create(name, email, telephone, password, itemDonationsTotal, valueDonationsTotal):
+    def create(name, email, telephone, password, itemDonationsTotal, valueDonationsTotal, user_type):
         conexao = obter_conexao()
         cursor = conexao.cursor()
         cursor.execute(
-            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonationsTotal, usr_valueDonationsTotal) VALUES (%s, %s, %s, %s, %s, %s)",
-            (name, email, telephone, password, itemDonationsTotal, valueDonationsTotal)
+            "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonationsTotal, usr_valueDonationsTotal, usr_type) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (name, email, telephone, password, itemDonationsTotal, valueDonationsTotal, user_type)
         )
         conexao.commit()
         conexao.close()

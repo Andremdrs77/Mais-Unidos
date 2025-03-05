@@ -566,10 +566,10 @@ def process_donation():
     return redirect(url_for('donations'))
 
 
-@app.route('/settings')
+@app.route('/logs')
 @login_required
-def settings():
-    return render_template('settings.html')
+def logs():
+    return render_template('logs.html')
 
 
 @app.route('/logout', methods=['POST'])

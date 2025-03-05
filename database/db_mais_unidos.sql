@@ -10,7 +10,8 @@ CREATE TABLE tb_users (
     usr_password TEXT NOT NULL,
     usr_createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usr_itemDonationsTotal INT DEFAULT 0,
-    usr_valueDonationsTotal DECIMAL(10,2) DEFAULT 0
+    usr_valueDonationsTotal DECIMAL(10,2) DEFAULT 0,
+    usr_type ENUM('Administrador', 'Usuário padrão') NOT NULL DEFAULT 'Usuário padrão'
 );
 
 CREATE TABLE tb_campaigns (

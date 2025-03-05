@@ -372,6 +372,7 @@
 
     <nav id="sidebar">
         <div id="sidebar_content">
+
             <div id="user">
                 <img src="{{ url_for('static', filename='images/logoAnimada.gif') }}" id="user_avatar" alt="Avatar">
             </div>
@@ -410,8 +411,20 @@
                         <span class="item-description">
                             Minhas doações
                         </span>
+                        
                     </a>
                 </li>
+
+                {% if current_user.user_type == 'Administrador' %}
+                <li class="side-item {% if request.endpoint == 'logs' %}active{% endif %}">
+                    <a href="{{ url_for('logs') }}">
+                        <i class="fa-solid fa-file-alt"></i>
+                        <span class="item-description">
+                            Arquivos de log
+                        </span>
+                    </a>
+                </li>
+                {% endif %}
 
             </ul>
 
