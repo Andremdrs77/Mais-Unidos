@@ -725,14 +725,27 @@
                     </a>
                 </li>
 
-                <li class="side-item {% if request.endpoint == 'settings' %}active{% endif %}">
-                    <a href="{{ url_for('settings') }}">
-                        <i class="fa-solid fa-gear"></i>
+                {% if current_user.user_type == 'Administrador' %}
+                <li class="side-item {% if request.endpoint == 'logs' %}active{% endif %}">
+                    <a href="{{ url_for('logs') }}">
+                        <i class="fa-solid fa-file-alt"></i>
                         <span class="item-description">
-                            Configurações
+                            Arquivos de log
                         </span>
                     </a>
                 </li>
+                {% endif %}
+
+                {% if current_user.user_type == 'Administrador' %}
+                <li class="side-item {% if request.endpoint == 'add_users' %}active{% endif %}">
+                    <a href="{{ url_for('add_users') }}">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="item-description">
+                            Adicionar e editar usuários
+                        </span>
+                    </a>
+                </li>
+                {% endif %}
             </ul>
 
             <button id="open_btn">

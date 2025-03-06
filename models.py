@@ -1,5 +1,6 @@
 import mysql.connector
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash
 
 def obter_conexao():
     return mysql.connector.connect(
@@ -103,6 +104,24 @@ class User(UserMixin):
             "INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonationsTotal, usr_valueDonationsTotal, usr_type) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             (name, email, telephone, password, itemDonationsTotal, valueDonationsTotal, user_type)
         )
+        conexao.commit()
+        conexao.close()
+    
+    @staticmethod
+    def update_user(user_id, name, email, telephone, user_type, password=None):
+        conexao = obter_conexao()
+        cursor = conexao.cursor()
+        if password and password.strip() != "":
+            hashed_password = generate_password_hash(password)
+            cursor.execute(
+                "UPDATE tb_users SET usr_name=%s, usr_email=%s, usr_telephone=%s, usr_password=%s, usr_type=%s WHERE usr_id=%s",
+                (name, email, telephone, hashed_password, user_type, user_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE tb_users SET usr_name=%s, usr_email=%s, usr_telephone=%s, usr_type=%s WHERE usr_id=%s",
+                (name, email, telephone, user_type, user_id)
+            )
         conexao.commit()
         conexao.close()
 

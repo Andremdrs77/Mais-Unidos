@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, Item, Campaign, Donation, DonationItem, obter_conexao
+from functools import wraps
 
 
 app = Flask(__name__)
@@ -11,6 +12,15 @@ app.config['SECRET_KEY'] = 'SUPERSECRETO'
 login_manager = LoginManager()
 login_manager.login_view = 'login_and_register'
 login_manager.init_app(app)
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.user_type != 'Administrador':
+            flash('Acesso restrito apenas para administradores.', 'danger')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @login_manager.user_loader
@@ -64,7 +74,8 @@ def login_and_register():
                         telephone=telephone, 
                         password=hashed_password,
                         itemDonationsTotal=0,
-                        valueDonationsTotal=0
+                        valueDonationsTotal=0,
+                        user_type='Usuário'
                     )
                     return redirect(url_for('index'))
         
@@ -568,8 +579,111 @@ def process_donation():
 
 @app.route('/logs')
 @login_required
+@admin_required
 def logs():
-    return render_template('logs.html')
+    conexao = obter_conexao()
+    cursor = conexao.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM logs_doacoes ORDER BY data_hora DESC")
+    logs_doacoes = cursor.fetchall()
+    cursor.execute("SELECT * FROM logs_campanhas ORDER BY data_hora DESC")
+    logs_campanhas = cursor.fetchall()
+    cursor.execute("SELECT * FROM logs_usuarios ORDER BY data_hora DESC")
+    logs_usuarios = cursor.fetchall()
+    conexao.close()
+    return render_template('logs.html', logs_doacoes=logs_doacoes, logs_campanhas=logs_campanhas, logs_usuarios=logs_usuarios)
+
+@app.route('/add_users')
+@login_required
+@admin_required
+def add_users():
+    return render_template('add_users.html')
+
+
+@app.route('/add_user', methods=['POST'])
+@login_required
+def add_user():
+    name = request.form['name']
+    email = request.form['email']
+    phone = request.form['phone']
+    password = request.form['password']
+    confirm_password = request.form['confirm_password']
+    user_type_form = request.form['user_type']  # "user" ou "admin"
+
+    if password != confirm_password:
+        flash('As senhas não coincidem!', 'usuario_criado_erro')
+        return redirect(url_for('add_users'))
+
+    existing_user = User.get_by_email(email)
+    if existing_user:
+        flash('Este e-mail já está cadastrado!', 'usuario_criado_erro')
+        return redirect(url_for('add_users'))
+
+    hashed_password = generate_password_hash(password)
+
+    # Mapeia "user" -> "Usuário" e "admin" -> "Administrador"
+    if user_type_form == "admin":
+        user_type_db = "Administrador"
+    else:
+        user_type_db = "Usuário"
+
+    # Agora salvamos "Usuário" ou "Administrador" no campo usr_type
+    User.create(
+        name=name, 
+        email=email, 
+        telephone=phone, 
+        password=hashed_password, 
+        itemDonationsTotal=0, 
+        valueDonationsTotal=0, 
+        user_type=user_type_db
+    )
+
+    flash('Usuário adicionado com sucesso!', 'usuario_criado_sucesso')
+    return redirect(url_for('add_users'))
+
+
+
+@app.route('/search_users')
+@login_required
+def search_users():
+    query = request.args.get('q', '')
+    like_query = f"%{query}%"
+    conexao = obter_conexao()
+    cursor = conexao.cursor()
+    cursor.execute(
+        "SELECT usr_id, usr_name, usr_email, usr_telephone, usr_type FROM tb_users WHERE usr_name LIKE %s OR usr_email LIKE %s OR usr_telephone LIKE %s",
+        (like_query, like_query, like_query)
+    )
+    results = cursor.fetchall()
+    conexao.close()
+    
+    users = []
+    for row in results:
+        users.append({
+            'id': row[0],
+            'name': row[1],
+            'email': row[2],
+            'phone': row[3],
+            'user_type': row[4]
+        })
+    return jsonify(users)
+
+
+@app.route('/edit_user/<int:user_id>', methods=['POST'])
+@login_required
+def edit_user(user_id):
+    # Essa rota é chamada via AJAX
+    name = request.form['name']
+    email = request.form['email']
+    phone = request.form['phone']
+    user_type = request.form['user_type']
+    password = request.form.get('password', '')
+    
+    # Atualiza o usuário (caso a senha tenha sido informada, ela é atualizada; caso contrário, mantém a antiga)
+    try:
+        User.update_user(user_id, name, email, phone, user_type, password)
+        return jsonify({'success': True, 'message': 'Usuário atualizado com sucesso!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @app.route('/logout', methods=['POST'])

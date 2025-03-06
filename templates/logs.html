@@ -1,22 +1,13 @@
 {% extends 'base.html' %}
 
 {% block title %} Arquivos de log {% endblock %}
-
 {% block titlePage %} Arquivos de log {% endblock %}
 
 {% block style %}
-
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-    body.modal-open {
-        overflow: hidden;
-    }
-
-    .donations-container {
-        margin: 20px 0;
-    }
-
+    /* Estilos gerais */
     .search-bar {
         display: flex;
         gap: 10px;
@@ -24,60 +15,12 @@
         align-items: center;
         flex-wrap: wrap;
     }
-
     .search-bar input {
         flex: 1;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
     }
-
-    .search-bar .dropdown {
-        position: relative;
-    }
-
-    .search-bar .dropdown button {
-        padding: 11px;
-        border: none;
-        border-radius: 5px;
-        background-color: #0d2329;
-        color: #fff;
-        cursor: pointer;
-    }
-
-    .search-bar .dropdown button:hover {
-        background-color: #08161a;
-    }
-
-    .search-bar .dropdown-content {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background-color: #fff;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1;
-        border-radius: 5px;
-    }
-
-    .search-bar .dropdown-content button {
-        padding: 10px;
-        width: 100%;
-        border: none;
-        background-color: #fff;
-        color: #0d2329;
-        cursor: pointer;
-        text-align: left;
-    }
-
-    .search-bar .dropdown-content button:hover {
-        background-color: #f1f1f1;
-    }
-
-    .search-bar .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
     .export-button {
         flex: 1;
         max-width: 200px;
@@ -92,35 +35,20 @@
         justify-content: center;
         gap: 8px;
     }
-
-    .export-button i {
-        font-size: 16px;
-    }
-
     .export-button:hover {
         background-color: #08161a;
     }
-
-    /* Estilos comuns para todas as tabelas */
-    .donations-table,
-    .campaigns-table,
-    .users-table {
-        display: none;
-    }
-
     .tabs {
         display: flex;
         justify-content: space-between;
         margin: 2% 0;
         width: 100%;
     }
-
     .tabs .tab-buttons {
         display: flex;
         gap: 0;
         width: 100%;
     }
-
     .tabs .tab-buttons button {
         flex: 1;
         text-align: center;
@@ -133,11 +61,9 @@
         position: relative;
         padding-bottom: 5px;
     }
-
     .tabs .tab-buttons button.active {
         color: #05664f;
     }
-
     .tabs .tab-buttons button.active:after {
         content: '';
         display: block;
@@ -149,83 +75,116 @@
         left: 0;
     }
 
-    @media (min-width: 768px) {
-        .donations-table,
-        .campaigns-table,
-        .users-table {
-            display: table;
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-bottom: 20px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+    /* ---------- Desktop: Tabelas ---------- */
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 20px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    table th, table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+        /* Cursor pointer para células */
+        cursor: pointer;
+    }
+    table th {
+        background-color: #05664f;
+        color: #fff;
+        font-weight: 600;
+    }
+    table tbody tr:nth-child(odd) { background-color: #f9f9f9; }
+    table tbody tr:nth-child(even) { background-color: #fff; }
+    table tbody tr:hover { background-color: #f0f0f0; }
 
-        .donations-table th,
-        .campaigns-table th,
-        .users-table th,
-        .donations-table td,
-        .campaigns-table td,
-        .users-table td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
+    /* Esconde as tabelas no mobile */
+    @media (max-width: 767px) {
+        table { display: none; }
+    }
 
-        .donations-table th,
-        .campaigns-table th,
-        .users-table th {
-            background-color: #05664f;
-            color: #fff;
-            font-weight: 600;
-        }
+    /* ---------- Mobile: Cards ---------- */
+    .cards-container {
+        display: none; /* escondido no desktop */
+    }
+    .log-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: #fff;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .log-card:hover { background-color: #f0f0f0; }
+    .log-card div {
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+    .log-card .label {
+        font-weight: bold;
+        color: #05664f;
+    }
+    .log-card .value {
+        margin-left: 5px;
+    }
+    @media (max-width: 767px) {
+        .cards-container { display: block; }
+    }
 
-        .donations-table tbody tr,
-        .campaigns-table tbody tr,
-        .users-table tbody tr {
-            display: table-row;
-        }
+    /* ---------- Modal Estilizado ---------- */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background-color: #fff;
+        /* Reduza um pouco o padding para diminuir o espaço interno */
+        padding: 15px 20px; 
+        border-radius: 10px;
+        max-width: 700px; 
+        width: 90%;
+        position: relative;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+        white-space: pre-line;
+        word-wrap: break-word; 
+    }
+    .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        cursor: pointer;
+        color: #ff5c5c;
+    }
 
-        .donations-table tbody tr:nth-child(odd),
-        .campaigns-table tbody tr:nth-child(odd),
-        .users-table tbody tr:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
+    /* Deixe os parágrafos mais compactos */
+    .modal-content p {
 
-        .donations-table tbody tr:nth-child(even),
-        .campaigns-table tbody tr:nth-child(even),
-        .users-table tbody tr:nth-child(even) {
-            background-color: #fff;
-        }
-
-        /* Esconde os cards em telas maiores */
-        .donations-cards,
-        .campaigns-cards,
-        .users-cards {
-            display: none;
-        }
+        line-height: 1.3;
     }
 </style>
-
 {% endblock %}
 
 {% block content %}
 <div class="search-bar">
-    <!-- Form de busca GET -->
-    <form method="GET" action="{{ url_for('donations') }}" style="display: flex; gap: 10px; flex:1;">
-        <input type="text" id="search-input" name="q" placeholder="Pesquisar doações..." 
-               value="{{ search_term|default('') }}">
-        <div class="dropdown" id="period-dropdown">
-            <button type="button">Selecionar período <i class="fa fa-chevron-down"></i></button>
-            <div class="dropdown-content">
-                <button data-period="7" type="button">Últimos 7 dias</button>
-                <button data-period="30" type="button">Últimos 30 dias</button>
-                <button data-period="60" type="button">Últimos 60 dias</button>
-                <button data-period="90" type="button">Últimos 90 dias</button>
-            </div>
-        </div>
+    <form method="GET" action="{{ url_for('logs') }}" style="display: flex; gap: 10px; flex:1;">
+        <input type="text" id="search-input" name="q" placeholder="Pesquisar logs..." value="{{ search_term|default('') }}">
         <button class="export-button" type="button" id="export-pdf-button">
             <i class="fa fa-file-pdf"></i> Exportar Relatório
         </button>
@@ -234,212 +193,415 @@
 
 <div class="tabs">
     <div class="tab-buttons">
-        <button class="active" id="tab-donations">Doações</button>
-        <button id="tab-campaigns">Campanhas</button>
-        <button id="tab-users">Usuários</button>
+        <button class="active" id="tab-doacoes">Doações</button>
+        <button id="tab-campanhas">Campanhas</button>
+        <button id="tab-usuarios">Usuários</button>
     </div>
 </div>
 
 <div class="logs-container">
-
-    <div id="logs-donations" class="log-content active">
-        <!-- Tabela para Desktop -->
-        <table class="donations-table" id="donations-table">
+    <!-- ======================= LOGS DE DOAÇÕES ======================= -->
+    <div id="logs-doacoes" class="log-content active">
+        <!-- Tabela (Desktop) -->
+        <table id="doacoes-table-desktop">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Operação</th>
-                    <th>ID da doação</th>
-                    <th>Data e hora da doação</th>
-                    <th>ID do doador</th>
-                    <th>Nome do doador</th>
+                    <th>ID Log</th>
+                    <th>Oper.</th>
+                    <th>ID Doação</th>
+                    <th>ID Doador</th>
+                    <th>Nome Doador</th>
+                    <th>ID Campanha</th>
+                    <th>Nome Campanha</th>
+                    <th>Valor</th>
+                    <th>Data/Hora</th>
                 </tr>
             </thead>
             <tbody>
-                {% for d in donations %}
-                <tr>
-                    <td>{{ d.id }}</td>
-                    <td>{{ d.campaign_name }}</td>
-                    <td>{{ d.donation_value }}</td>
-                    <td>{{ d.date }}</td>
+                {% for log in logs_doacoes %}
+                {% set short_usr_name = log.usr_name if log.usr_name|length <= 10 else log.usr_name[:10] ~ '...' %}
+                {% set short_cam_name = log.cam_name if log.cam_name|length <= 10 else log.cam_name[:10] ~ '...' %}
+                <tr class="log-row" 
+                    data-idlog="{{ log.log_id }}"
+                    data-oper="{{ log.operacao }}"
+                    data-iddoc="{{ log.dnt_id }}"
+                    data-iddoador="{{ log.usr_id }}"
+                    data-nomedoador="{{ log.usr_name }}"
+                    data-idcamp="{{ log.cam_id }}"
+                    data-nomecamp="{{ log.cam_name }}"
+                    data-valor="{{ log.dnt_value }}"
+                    data-datahora="{{ log.data_hora }}">
+                    <td>{{ log.log_id }}</td>
+                    <td>{{ log.operacao }}</td>
+                    <td>{{ log.dnt_id }}</td>
+                    <td>{{ log.usr_id }}</td>
+                    <td>{{ short_usr_name }}</td>
+                    <td>{{ log.cam_id }}</td>
+                    <td>{{ short_cam_name }}</td>
+                    <td>{{ log.dnt_value }}</td>
+                    <td>{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Cards para Mobile -->
-        <div class="donations-cards" id="donations-cards">
-            {% for d in donations %}
-            <div class="donation-card">
-                <div><span class="label">ID:</span> <span class="value">{{ d.id }}</span></div>
-                <div><span class="label">Campanha:</span> <span class="value">{{ d.campaign_name }}</span></div>
-                <div><span class="label">Valor/Quantidade:</span> <span class="value">{{ d.donation_value }}</span></div>
-                <div><span class="label">Data:</span> <span class="value">{{ d.date }}</span></div>
+        <!-- Cards (Mobile) -->
+        <div class="cards-container" id="doacoes-cards-mobile">
+            {% for log in logs_doacoes %}
+            {% set short_usr_name = log.usr_name if log.usr_name|length <= 10 else log.usr_name[:10] ~ '...' %}
+            {% set short_cam_name = log.cam_name if log.cam_name|length <= 10 else log.cam_name[:10] ~ '...' %}
+            <div class="log-card" 
+                data-idlog="{{ log.log_id }}"
+                data-oper="{{ log.operacao }}"
+                data-iddoc="{{ log.dnt_id }}"
+                data-iddoador="{{ log.usr_id }}"
+                data-nomedoador="{{ log.usr_name }}"
+                data-idcamp="{{ log.cam_id }}"
+                data-nomecamp="{{ log.cam_name }}"
+                data-valor="{{ log.dnt_value }}"
+                data-datahora="{{ log.data_hora }}">
+                <div><span class="label">ID Log:</span> <span class="value">{{ log.log_id }}</span></div>
+                <div><span class="label">Oper:</span> <span class="value">{{ log.operacao }}</span></div>
+                <div><span class="label">Doador:</span> <span class="value">{{ short_usr_name }}</span></div>
+                <div><span class="label">Camp.:</span> <span class="value">{{ short_cam_name }}</span></div>
+                <div><span class="label">Data:</span> <span class="value">{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</span></div>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <div id="logs-campaigns" class="log-content" style="display: none;">
-        <!-- Tabela para Desktop -->
-        <table class="campaigns-table" id="campaigns-table">
+    <!-- ======================= LOGS DE CAMPANHAS ======================= -->
+    <div id="logs-campanhas" class="log-content" style="display: none;">
+        <!-- Tabela (Desktop) -->
+        <table id="campanhas-table-desktop">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>ID Log</th>
                     <th>Operação</th>
-                    <th>ID da campanha</th>
-                    <th>Data e hora</th>
-                    <th>ID do dono da campanha</th>
-                    <th>Nome do dono da campanha</th>
+                    <th>ID Campanha</th>
+                    <th>ID Dono</th>
+                    <th>Título</th>
+                    <th>Descrição</th>
+                    <th>Prazo</th>
+                    <th>Meta</th>
+                    <th>Alcançado</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Data/Hora</th>
                 </tr>
             </thead>
             <tbody>
-                {% for d in donations %}
-                <tr>
-                    <td>{{ d.id }}</td>
-                    <td>{{ d.campaign_name }}</td>
-                    <td>{{ d.donation_value }}</td>
-                    <td>{{ d.date }}</td>
+                {% for log in logs_campanhas %}
+                {% set short_title = log.cam_title if log.cam_title|length <= 10 else log.cam_title[:10] ~ '...' %}
+                {% set short_desc = log.cam_description if log.cam_description|length <= 20 else log.cam_description[:20] ~ '...' %}
+                <tr class="log-row"
+                    data-idlog="{{ log.log_id }}"
+                    data-oper="{{ log.operacao }}"
+                    data-idcamp="{{ log.cam_id }}"
+                    data-iddono="{{ log.usr_id }}"
+                    data-title="{{ log.cam_title }}"
+                    data-description="{{ log.cam_description }}"
+                    data-deadline="{{ log.cam_deadline }}"
+                    data-meta="{{ log.cam_meta }}"
+                    data-reached="{{ log.cam_reachedMeta }}"
+                    data-tipo="{{ log.cam_tipo }}"
+                    data-status="{{ log.cam_status }}"
+                    data-datahora="{{ log.data_hora }}">
+                    <td>{{ log.log_id }}</td>
+                    <td>{{ log.operacao }}</td>
+                    <td>{{ log.cam_id }}</td>
+                    <td>{{ log.usr_id }}</td>
+                    <td>{{ short_title }}</td>
+                    <td>{{ short_desc }}</td>
+                    <td>{{ log.cam_deadline.strftime("%d/%m/%Y") if log.cam_deadline else "" }}</td>
+                    <td>{{ log.cam_meta }}</td>
+                    <td>{{ log.cam_reachedMeta }}</td>
+                    <td>{{ log.cam_tipo }}</td>
+                    <td>{{ log.cam_status }}</td>
+                    <td>{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Cards para Mobile -->
-        <div class="campaigns-cards" id="campaigns-cards">
-            {% for d in donations %}
-            <div class="donation-card">
-                <div><span class="label">ID:</span> <span class="value">{{ d.id }}</span></div>
-                <div><span class="label">Campanha:</span> <span class="value">{{ d.campaign_name }}</span></div>
-                <div><span class="label">Valor/Quantidade:</span> <span class="value">{{ d.donation_value }}</span></div>
-                <div><span class="label">Data:</span> <span class="value">{{ d.date }}</span></div>
+        <!-- Cards (Mobile) -->
+        <div class="cards-container" id="campanhas-cards-mobile">
+            {% for log in logs_campanhas %}
+            {% set short_title = log.cam_title if log.cam_title|length <= 10 else log.cam_title[:10] ~ '...' %}
+            {% set short_desc = log.cam_description if log.cam_description|length <= 20 else log.cam_description[:20] ~ '...' %}
+            <div class="log-card"
+                data-idlog="{{ log.log_id }}"
+                data-oper="{{ log.operacao }}"
+                data-idcamp="{{ log.cam_id }}"
+                data-iddono="{{ log.usr_id }}"
+                data-title="{{ log.cam_title }}"
+                data-description="{{ log.cam_description }}"
+                data-deadline="{{ log.cam_deadline }}"
+                data-meta="{{ log.cam_meta }}"
+                data-reached="{{ log.cam_reachedMeta }}"
+                data-tipo="{{ log.cam_tipo }}"
+                data-status="{{ log.cam_status }}"
+                data-datahora="{{ log.data_hora }}">
+                <div><span class="label">ID Log:</span> <span class="value">{{ log.log_id }}</span></div>
+                <div><span class="label">Oper:</span> <span class="value">{{ log.operacao }}</span></div>
+                <div><span class="label">Título:</span> <span class="value">{{ short_title }}</span></div>
+                <div><span class="label">Desc.:</span> <span class="value">{{ short_desc }}</span></div>
+                <div><span class="label">Data:</span> <span class="value">{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</span></div>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <div id="logs-users" class="log-content" style="display: none;">
-        <!-- Tabela para Desktop -->
-        <table class="users-table" id="users-table">
+    <!-- ======================= LOGS DE USUÁRIOS ======================= -->
+    <div id="logs-usuarios" class="log-content" style="display: none;">
+        <!-- Tabela (Desktop) -->
+        <table id="usuarios-table-desktop">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>ID Log</th>
                     <th>Operação</th>
-                    <th>ID da doação</th>
-                    <th>ID do doador</th>
-                    <th>Nome do doador</th>
-                    <th>Data e hora da doação</th>
+                    <th>ID Usuário</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Tipo</th>
+                    <th>Data/Hora</th>
                 </tr>
             </thead>
             <tbody>
-                {% for d in donations %}
-                <tr>
-                    <td>{{ d.id }}</td>
-                    <td>{{ d.campaign_name }}</td>
-                    <td>{{ d.donation_value }}</td>
-                    <td>{{ d.date }}</td>
+                {% for log in logs_usuarios %}
+                {% set short_name = log.usr_name if log.usr_name|length <= 10 else log.usr_name[:10] ~ '...' %}
+                {% set short_email = log.usr_email if log.usr_email|length <= 15 else log.usr_email[:15] ~ '...' %}
+                <tr class="log-row"
+                    data-idlog="{{ log.log_id }}"
+                    data-oper="{{ log.operacao }}"
+                    data-idusr="{{ log.usr_id }}"
+                    data-nome="{{ log.usr_name }}"
+                    data-email="{{ log.usr_email }}"
+                    data-telefone="{{ log.usr_telephone }}"
+                    data-tipo="{{ log.usr_type }}"
+                    data-datahora="{{ log.data_hora }}">
+                    <td>{{ log.log_id }}</td>
+                    <td>{{ log.operacao }}</td>
+                    <td>{{ log.usr_id }}</td>
+                    <td>{{ short_name }}</td>
+                    <td>{{ short_email }}</td>
+                    <td>{{ log.usr_telephone }}</td>
+                    <td>{{ log.usr_type }}</td>
+                    <td>{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Cards para Mobile -->
-        <div class="users-cards" id="users-cards">
-            {% for d in donations %}
-            <div class="donation-card">
-                <div><span class="label">ID:</span> <span class="value">{{ d.id }}</span></div>
-                <div><span class="label">Campanha:</span> <span class="value">{{ d.campaign_name }}</span></div>
-                <div><span class="label">Valor/Quantidade:</span> <span class="value">{{ d.donation_value }}</span></div>
-                <div><span class="label">Data:</span> <span class="value">{{ d.date }}</span></div>
+        <!-- Cards (Mobile) -->
+        <div class="cards-container" id="usuarios-cards-mobile">
+            {% for log in logs_usuarios %}
+            {% set short_name = log.usr_name if log.usr_name|length <= 10 else log.usr_name[:10] ~ '...' %}
+            {% set short_email = log.usr_email if log.usr_email|length <= 15 else log.usr_email[:15] ~ '...' %}
+            <div class="log-card"
+                data-idlog="{{ log.log_id }}"
+                data-oper="{{ log.operacao }}"
+                data-idusr="{{ log.usr_id }}"
+                data-nome="{{ log.usr_name }}"
+                data-email="{{ log.usr_email }}"
+                data-telefone="{{ log.usr_telephone }}"
+                data-tipo="{{ log.usr_type }}"
+                data-datahora="{{ log.data_hora }}">
+                <div><span class="label">ID Log:</span> <span class="value">{{ log.log_id }}</span></div>
+                <div><span class="label">Oper:</span> <span class="value">{{ log.operacao }}</span></div>
+                <div><span class="label">Nome:</span> <span class="value">{{ short_name }}</span></div>
+                <div><span class="label">Email:</span> <span class="value">{{ short_email }}</span></div>
+                <div><span class="label">Data:</span> <span class="value">{{ log.data_hora.strftime("%d/%m/%Y %H:%M:%S") if log.data_hora else "" }}</span></div>
             </div>
             {% endfor %}
         </div>
     </div>
+</div>
 
+<!-- MODAL para exibir detalhes completos -->
+<div id="logDetailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <h3>Detalhes do Log</h3>
+        <div id="modal-body">
+            <!-- Conteúdo preenchido via JavaScript -->
+        </div>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.querySelectorAll('.dropdown-content button').forEach(button => {
-        button.addEventListener('click', function () {
-            const period = this.getAttribute('data-period');
-            alert(`Filtrar doações por período: Últimos ${period} dias (exemplo)`);
-            // Aqui você pode implementar a lógica para filtrar no back-end ou front-end
-        });
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ======== TABS ========
+    function switchTab(tabId) {
+        document.querySelectorAll(".log-content").forEach(el => el.style.display = "none");
+        document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
+        const activeTab = document.getElementById(tabId);
+        if (activeTab) {
+            activeTab.style.display = "block";
+            const btnId = "tab-" + tabId.split("-")[1];
+            document.getElementById(btnId).classList.add("active");
+        }
+    }
+    document.getElementById("tab-doacoes").addEventListener("click", function () {
+        switchTab("logs-doacoes");
+    });
+    document.getElementById("tab-campanhas").addEventListener("click", function () {
+        switchTab("logs-campanhas");
+    });
+    document.getElementById("tab-usuarios").addEventListener("click", function () {
+        switchTab("logs-usuarios");
     });
 
-    // Função de exportar para PDF
+    // ======== EXPORT PDF ========
     document.getElementById('export-pdf-button').addEventListener('click', function () {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        // Seleciona a tabela dentro da aba ativa
-        let activeTable = document.querySelector('.log-content.active table');
+        const doc = new jsPDF('landscape');
         
-        if (!activeTable) {
-            alert("Nenhuma tabela ativa encontrada para exportação.");
+        // Procura o container de log visível
+        let activeContent = null;
+        document.querySelectorAll('.log-content').forEach(el => {
+            if (window.getComputedStyle(el).display !== "none") {
+                activeContent = el;
+            }
+        });
+        
+        if (!activeContent) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Nenhuma tabela ativa encontrada para exportação.',
+                confirmButtonColor: '#05664f'
+            });
             return;
         }
         
-        let activeTab = document.querySelector('.tab-buttons button.active').textContent.trim();
-        let fileName = `Arquivo de logs: ${activeTab}.pdf`;
+        let activeTable = activeContent.querySelector('table');
+        if (!activeTable) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Nenhuma tabela ativa encontrada para exportação.',
+                confirmButtonColor: '#05664f'
+            });
+            return;
+        }
         
-        doc.text(`Relatório de ${activeTab}`, 14, 16);
-        doc.autoTable({
-            html: activeTable,
-            startY: 20,
-            theme: 'grid',
-        });
+        let activeId = activeContent.getAttribute('id'); 
+        let activeName = "";
+        if (activeId === "logs-doacoes") activeName = "Doações";
+        else if (activeId === "logs-campanhas") activeName = "Campanhas";
+        else if (activeId === "logs-usuarios") activeName = "Usuários";
         
+        let fileName = `Arquivo de logs - ${activeName}.pdf`;
+        doc.text(`Relatório de ${activeName}`, 14, 16);
+        doc.autoTable({ html: activeTable, startY: 20, theme: 'grid' });
         doc.save(fileName);
     });
 
-    // Busca no front-end: filtra os cards e as linhas da tabela da aba ativa
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const filter = this.value.toLowerCase();
-            const cards = document.querySelectorAll('.donation-card');
-            cards.forEach(card => {
-                const match = Array.from(card.querySelectorAll('.value'))
-                                    .some(value => value.textContent.toLowerCase().includes(filter));
-                card.style.display = match ? '' : 'none';
-            });
-            const rows = document.querySelectorAll('.log-content.active table tbody tr');
-            rows.forEach(row => {
-                const match = Array.from(row.querySelectorAll('td'))
-                                   .some(cell => cell.textContent.toLowerCase().includes(filter));
-                row.style.display = match ? '' : 'none';
-            });
-        });
-    }
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        function switchTab(tabId) {
-            document.querySelectorAll(".log-content").forEach(el => el.style.display = "none");
-            document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
-
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                activeTab.style.display = "block";
-                document.querySelector(`[id="tab-${tabId.split('-')[1]}"]`).classList.add("active");
-            }
+    // ======== MODAL (Detalhes do Log) ========
+    function buildModalHTML(dataset) {
+        let html = `<p><strong>ID Log:</strong> ${dataset.idlog || ""}</p>
+                    <p><strong>Operação:</strong> ${dataset.oper || ""}</p>`;
+        // Se for doações (possui iddoc)
+        if (dataset.iddoc) {
+            html += `<p><strong>ID Doação:</strong> ${dataset.iddoc}</p>
+                     <p><strong>ID Doador:</strong> ${dataset.iddoador || ""}</p>
+                     <p><strong>Nome Doador:</strong> ${dataset.nomedoador || ""}</p>
+                     <p><strong>ID Campanha:</strong> ${dataset.idcamp || ""}</p>
+                     <p><strong>Nome Campanha:</strong> ${dataset.nomecamp || ""}</p>
+                     <p><strong>Valor:</strong> ${dataset.valor || ""}</p>
+                     <p><strong>Data/Hora:</strong> ${dataset.datahora || ""}</p>`;
         }
+        // Se for campanhas (possui idcamp e não iddoc)
+        else if (dataset.idcamp && !dataset.iddoc) {
+            html += `<p><strong>ID Campanha:</strong> ${dataset.idcamp}</p>
+                     <p><strong>ID Dono:</strong> ${dataset.iddono || ""}</p>
+                     <p><strong>Título:</strong> ${dataset.title || ""}</p>
+                     <p><strong>Descrição:</strong> ${dataset.description || ""}</p>
+                     <p><strong>Prazo:</strong> ${dataset.deadline || ""}</p>
+                     <p><strong>Meta:</strong> ${dataset.meta || ""}</p>
+                     <p><strong>Alcançado:</strong> ${dataset.reached || ""}</p>
+                     <p><strong>Tipo:</strong> ${dataset.tipo || ""}</p>
+                     <p><strong>Status:</strong> ${dataset.status || ""}</p>
+                     <p><strong>Data/Hora:</strong> ${dataset.datahora || ""}</p>`;
+        }
+        // Se for usuários (possui idusr)
+        else if (dataset.idusr) {
+            html += `<p><strong>ID Usuário:</strong> ${dataset.idusr}</p>
+                     <p><strong>Nome:</strong> ${dataset.nome || ""}</p>
+                     <p><strong>Email:</strong> ${dataset.email || ""}</p>
+                     <p><strong>Telefone:</strong> ${dataset.telefone || ""}</p>
+                     <p><strong>Tipo:</strong> ${dataset.tipo || ""}</p>
+                     <p><strong>Data/Hora:</strong> ${dataset.datahora || ""}</p>`;
+        }
+        return html;
+    }
 
-        document.getElementById("tab-donations").addEventListener("click", function () {
-            switchTab("logs-donations");
-        });
+    function openLogModal(dataset) {
+        const modal = document.getElementById("logDetailsModal");
+        const modalBody = document.getElementById("modal-body");
+        // Se a descrição não foi passada, tente pegar do dataset completo
+        if(dataset.description === undefined && dataset.title !== undefined){
+            // Se for campanha, atribuir a descrição completa
+            dataset.description = dataset.full_description || "";
+        }
+        modalBody.innerHTML = buildModalHTML(dataset);
+        modal.style.display = "flex";
+    }
 
-        document.getElementById("tab-campaigns").addEventListener("click", function () {
-            switchTab("logs-campaigns");
-        });
+    document.getElementById("closeModal").addEventListener("click", function(){
+        document.getElementById("logDetailsModal").style.display = "none";
+    });
 
-        document.getElementById("tab-users").addEventListener("click", function () {
-            switchTab("logs-users");
+    document.querySelectorAll(".log-row").forEach(row => {
+        row.addEventListener("click", function(){
+            openLogModal(this.dataset);
         });
     });
+
+    document.querySelectorAll(".log-card").forEach(card => {
+        card.addEventListener("click", function(){
+            openLogModal(this.dataset);
+        });
+    });
+
+    // ======== PESQUISA NA SEARCH BAR ========
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const filter = this.value.toLowerCase();
+
+            // Encontra qual conteúdo (aba) está visível
+            let activeContent = document.querySelector(".log-content:not([style*='display: none'])");
+            if (!activeContent) return;
+
+            // Filtra as linhas da tabela
+            let table = activeContent.querySelector("table");
+            if (table) {
+                let rows = table.querySelectorAll("tbody tr");
+                rows.forEach(row => {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? "" : "none";
+                });
+            }
+
+            // Filtra os cards
+            let cardsContainer = activeContent.querySelector(".cards-container");
+            if (cardsContainer) {
+                let cards = cardsContainer.querySelectorAll(".log-card");
+                cards.forEach(card => {
+                    let text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(filter) ? "" : "none";
+                });
+            }
+        });
+    }
+
+});
 </script>
 {% endblock %}
