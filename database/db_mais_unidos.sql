@@ -72,6 +72,7 @@ CREATE TABLE tb_donation_items (
 --
 -- FUNÇÃO TOTAL DOADO
 --
+
 DELIMITER $$
 CREATE FUNCTION total_doado(
     p_id_doador INT, 
@@ -85,7 +86,7 @@ BEGIN
     SELECT IFNULL(SUM(dnt_value), 0) INTO total
     FROM tb_donations
     WHERE dnt_usr_id = p_id_doador 
-      AND dnt_createdAt BETWEEN p_data_inicio AND p_data_fim;
+    AND dnt_createdAt BETWEEN p_data_inicio AND p_data_fim;
     RETURN total;
 END$$
 DELIMITER ;
@@ -115,6 +116,7 @@ DELIMITER ;
 --
 -- TRIGGER FECHAR_CAMPANHA
 --
+
 DELIMITER $$
 CREATE TRIGGER fechar_campanha
 BEFORE UPDATE ON tb_campaigns
@@ -131,6 +133,7 @@ DELIMITER ;
 --
 -- Tabela de logs de DOAÇÕES (atualizada)
 --
+
 CREATE TABLE logs_doacoes (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     operacao VARCHAR(20) NOT NULL,
@@ -178,6 +181,7 @@ CREATE TABLE logs_usuarios (
 --
 -- TRIGGER: log_doacoes_insert
 --
+
 DELIMITER $$
 CREATE TRIGGER log_doacoes_insert
 AFTER INSERT ON tb_donations
@@ -404,6 +408,68 @@ INSERT INTO tb_users (
     0.00,
     'Administrador'
 );
+
+-- Inserção de 5 usuários fictícios com o mesmo hash de senha
+INSERT INTO tb_users (usr_name, usr_email, usr_telephone, usr_password, usr_itemDonationsTotal, usr_valueDonationsTotal, usr_type)
+VALUES
+('Alice', 'alice@example.com', '1111111111', 'scrypt:32768:8:1$zLT8bioiVhKT2x1i$7f85c334e1d9bb769424eb4b2e59c72d8b5f3b60e29e6ac1bf1a4f77ed3a001b3a1dc4302239930b14cd3dba2cf05dc39b99d7c816ec1b0c3f924936b5bbbdbc', 0, 0.00, 'Usuário'),
+('Bob', 'bob@example.com', '2222222222', 'scrypt:32768:8:1$zLT8bioiVhKT2x1i$7f85c334e1d9bb769424eb4b2e59c72d8b5f3b60e29e6ac1bf1a4f77ed3a001b3a1dc4302239930b14cd3dba2cf05dc39b99d7c816ec1b0c3f924936b5bbbdbc', 0, 0.00, 'Usuário'),
+('Charlie', 'charlie@example.com', '3333333333', 'scrypt:32768:8:1$zLT8bioiVhKT2x1i$7f85c334e1d9bb769424eb4b2e59c72d8b5f3b60e29e6ac1bf1a4f77ed3a001b3a1dc4302239930b14cd3dba2cf05dc39b99d7c816ec1b0c3f924936b5bbbdbc', 0, 0.00, 'Usuário'),
+('David', 'david@example.com', '4444444444', 'scrypt:32768:8:1$zLT8bioiVhKT2x1i$7f85c334e1d9bb769424eb4b2e59c72d8b5f3b60e29e6ac1bf1a4f77ed3a001b3a1dc4302239930b14cd3dba2cf05dc39b99d7c816ec1b0c3f924936b5bbbdbc', 0, 0.00, 'Usuário'),
+('Eve', 'eve@example.com', '5555555555', 'scrypt:32768:8:1$zLT8bioiVhKT2x1i$7f85c334e1d9bb769424eb4b2e59c72d8b5f3b60e29e6ac1bf1a4f77ed3a001b3a1dc4302239930b14cd3dba2cf05dc39b99d7c816ec1b0c3f924936b5bbbdbc', 0, 0.00, 'Usuário');
+
+-- Inserção de campanhas
+
+-- Campanha 1: Financeiro, criada por Alice (usr_id = 1)
+INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_reachedMeta, cam_tipo, cam_status, cam_usr_id)
+VALUES ('Campanha A', 'Campanha para arrecadação de fundos', '2023-12-31', 1000, 200, 'Financeiro', 'Ativa', 1);
+
+-- Campanha 2: Itens, criada por Bob (usr_id = 2)
+INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_reachedMeta, cam_tipo, cam_status, cam_usr_id)
+VALUES ('Campanha B', 'Campanha de doação de itens', '2023-11-30', 100, 50, 'Itens', 'Ativa', 2);
+
+-- Campanha 3: Itens e Financeiro, criada por Charlie (usr_id = 3)
+INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_reachedMeta, cam_tipo, cam_status, cam_usr_id)
+VALUES ('Campanha C', 'Campanha mista para arrecadação de fundos e itens', '2023-10-31', 500, 300, 'Itens e Financeiro', 'Ativa', 3);
+
+-- Campanha 4: Financeiro, encerrada, criada por David (usr_id = 4)
+INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_reachedMeta, cam_tipo, cam_status, cam_usr_id)
+VALUES ('Campanha D', 'Campanha encerrada', '2023-05-31', 1000, 1000, 'Financeiro', 'Encerrada', 4);
+
+-- Campanha 5: Itens, criada por Eve (usr_id = 5)
+INSERT INTO tb_campaigns (cam_title, cam_description, cam_deadline, cam_meta, cam_reachedMeta, cam_tipo, cam_status, cam_usr_id)
+VALUES ('Campanha E', 'Campanha para arrecadação de itens', '2023-09-30', 50, 20, 'Itens', 'Ativa', 5);
+
+-- Inserção de itens
+-- Para Campanha 2 (Itens)
+INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value) VALUES ('Camisetas', 100, 2, NULL);
+
+-- Para Campanha 3 (Itens e Financeiro)
+INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value) VALUES 
+('Cobertores', 50, 3, 20),
+('Agasalhos', 30, 3, 30);
+
+-- Para Campanha 5 (Itens)
+INSERT INTO tb_items (itm_name, itm_quantity, itm_cam_id, itm_value) VALUES ('Alimentos', 50, 5, NULL);
+
+-- Inserção de doações com datas diferentes
+INSERT INTO tb_donations (dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt) VALUES
+(1, 1, 100, '2023-01-15 10:00:00'),
+(2, 1, 200, '2023-02-20 15:30:00'),
+(4, 3, 150, '2023-04-05 09:45:00'),
+(5, 3, 100, '2023-04-10 11:20:00'),
+(1, 4, 300, '2023-05-01 14:00:00');
+
+-- Inserção de doação de itens (tb_donation_items)
+-- Para a doação 3 (Campanha 2) – supondo que o itm_id da 'Camisetas' seja 1
+INSERT INTO tb_donation_items (dni_dnt_id, dni_item_id, dni_quantity) VALUES (3, 1, 10);
+
+-- Inserção adicional de doações para testar os filtros de datas
+INSERT INTO tb_donations (dnt_usr_id, dnt_cam_id, dnt_value, dnt_createdAt) VALUES
+(3, 1, 50, '2023-07-20 10:00:00'),
+(5, 4, 250, '2023-09-05 09:00:00'),
+(1, 3, 75, '2023-10-12 11:00:00'),
+(2, 2, 120, '2023-10-15 16:00:00');
 
 
 SELECT * FROM tb_users;

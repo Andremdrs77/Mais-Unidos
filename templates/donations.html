@@ -1,17 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %} Minhas Doações {% endblock %}
-
 {% block titlePage %} Minhas Doações {% endblock %}
 
 {% block style %}
-
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-    body.modal-open {
-        overflow: hidden;
-    }
 
     .donations-container {
         margin: 20px 0;
@@ -24,7 +18,6 @@
         align-items: center;
         flex-wrap: wrap;
     }
-
     .search-bar input {
         flex: 1;
         padding: 10px;
@@ -32,11 +25,10 @@
         border-radius: 5px;
     }
 
-    .search-bar .dropdown {
+    .dropdown {
         position: relative;
     }
-
-    .search-bar .dropdown button {
+    .dropdown button {
         padding: 11px;
         border: none;
         border-radius: 5px;
@@ -44,12 +36,10 @@
         color: #fff;
         cursor: pointer;
     }
-
-    .search-bar .dropdown button:hover {
+    .dropdown button:hover {
         background-color: #08161a;
     }
-
-    .search-bar .dropdown-content {
+    .dropdown-content {
         display: none;
         position: absolute;
         top: 100%;
@@ -59,8 +49,7 @@
         z-index: 1;
         border-radius: 5px;
     }
-
-    .search-bar .dropdown-content button {
+    .dropdown-content button {
         padding: 10px;
         width: 100%;
         border: none;
@@ -69,12 +58,10 @@
         cursor: pointer;
         text-align: left;
     }
-
-    .search-bar .dropdown-content button:hover {
+    .dropdown-content button:hover {
         background-color: #f1f1f1;
     }
-
-    .search-bar .dropdown:hover .dropdown-content {
+    .dropdown:hover .dropdown-content {
         display: block;
     }
 
@@ -92,24 +79,44 @@
         justify-content: center;
         gap: 8px;
     }
-
+    .export-button:hover {
+        background-color: #08161a;
+    }
     .export-button i {
         font-size: 16px;
     }
 
-    .export-button:hover {
-        background-color: #08161a;
+    /* Formulário para intervalo personalizado */
+    .custom-range-container {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-left: 10px;
+    }
+    .custom-range-container input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .custom-range-container button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        background-color: #05664f;
+        color: #fff;
+        cursor: pointer;
+    }
+    .custom-range-container button:hover {
+        background-color: #044f3c;
     }
 
     .donations-table {
         display: none;
     }
-
     .donations-cards {
         display: grid;
         gap: 10px;
     }
-
     .donation-card {
         border: 1px solid #ddd;
         border-radius: 5px;
@@ -117,16 +124,13 @@
         background-color: #fff;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     }
-
     .donation-card div {
         margin-bottom: 8px;
     }
-
     .donation-card .label {
         font-weight: bold;
         color: #05664f;
     }
-
     .donation-card .value {
         margin-left: 5px;
     }
@@ -142,38 +146,28 @@
             border-radius: 10px;
             overflow: hidden;
         }
-
         .donations-table th,
         .donations-table td {
             padding: 10px;
             text-align: left;
             border: 1px solid #ddd;
         }
-
         .donations-table th {
             background-color: #05664f;
             color: #fff;
             font-weight: 600;
         }
-
-        .donations-table tbody tr {
-            display: table-row;
-        }
-
         .donations-table tbody tr:nth-child(odd) {
             background-color: #f9f9f9;
         }
-
         .donations-table tbody tr:nth-child(even) {
             background-color: #fff;
         }
-
         .donations-cards {
             display: none;
         }
     }
 </style>
-
 {% endblock %}
 
 {% block content %}
@@ -195,6 +189,15 @@
             <i class="fa fa-file-pdf"></i> Exportar Relatório
         </button>
     </form>
+</div>
+
+<!-- Formulário para intervalo personalizado -->
+<div class="custom-range-container">
+    <label for="startDate">Início:</label>
+    <input type="date" id="startDate">
+    <label for="endDate">Fim:</label>
+    <input type="date" id="endDate">
+    <button type="button" id="applyCustomRange">Filtrar</button>
 </div>
 
 <div class="donations-container">
@@ -233,19 +236,157 @@
     </div>
 </div>
 
+<!-- IMPORT SweetAlert2 (caso ainda não esteja no base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <script>
+// Converte data "dd/mm/yyyy" em objeto Date (ajuste se usar outro formato)
+function parseDate(dateString) {
+    if (!dateString) return null;
+    const parts = dateString.split('/');
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // zero-based
+    const year = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+}
+
+// Filtra pelo período relativo (ex: últimos 7, 30, 60, 90 dias)
+function filterByPeriod(days) {
+    const now = new Date();
+    const limitDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+
+    // Filtrar linhas da tabela
+    const rows = document.querySelectorAll('#donations-table tbody tr');
+    rows.forEach(row => {
+        const dateCell = row.cells[3];
+        if (!dateCell) return;
+        const rowDate = parseDate(dateCell.textContent.trim());
+        if (!rowDate) {
+            row.style.display = 'none';
+            return;
+        }
+        row.style.display = (rowDate >= limitDate) ? '' : 'none';
+    });
+
+    // Filtrar cards (mobile)
+    const cards = document.querySelectorAll('#donations-cards .donation-card');
+    cards.forEach(card => {
+        // Procurando a <div> "Data:" => .label "Data:" + .value
+        const dateDiv = card.querySelector('.label:nth-of-type(4) ~ .value');
+        if (!dateDiv) return;
+        const cardDate = parseDate(dateDiv.textContent.trim());
+        if (!cardDate) {
+            card.style.display = 'none';
+            return;
+        }
+        card.style.display = (cardDate >= limitDate) ? '' : 'none';
+    });
+}
+
+// Filtra por data de início e data de fim (uma ou ambas)
+function filterByCustomRange(start, end) {
+    const rows = document.querySelectorAll('#donations-table tbody tr');
+    rows.forEach(row => {
+        const dateCell = row.cells[3];
+        if (!dateCell) return;
+        const rowDate = parseDate(dateCell.textContent.trim());
+        if (!rowDate) {
+            row.style.display = 'none';
+            return;
+        }
+        // Se existe start, checa se rowDate >= start
+        if (start && rowDate < start) {
+            row.style.display = 'none';
+            return;
+        }
+        // Se existe end, checa se rowDate <= end
+        if (end && rowDate > end) {
+            row.style.display = 'none';
+            return;
+        }
+        // Passou nos critérios
+        row.style.display = '';
+    });
+
+    // Filtrar cards (mobile)
+    const cards = document.querySelectorAll('#donations-cards .donation-card');
+    cards.forEach(card => {
+        const dateDiv = card.querySelector('.label:nth-of-type(4) ~ .value');
+        if (!dateDiv) return;
+        const cardDate = parseDate(dateDiv.textContent.trim());
+        if (!cardDate) {
+            card.style.display = 'none';
+            return;
+        }
+        if (start && cardDate < start) {
+            card.style.display = 'none';
+            return;
+        }
+        if (end && cardDate > end) {
+            card.style.display = 'none';
+            return;
+        }
+        card.style.display = '';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Botões de período (7, 30, 60, 90 dias)
     document.querySelectorAll('.dropdown-content button').forEach(button => {
         button.addEventListener('click', function () {
-            const period = this.getAttribute('data-period');
-            alert(`Filtrar doações por período: Últimos ${period} dias (exemplo)`);
-            // AQUI você pode implementar lógica para filtrar no back-end ou front-end
+            const period = parseInt(this.getAttribute('data-period'));
+            filterByPeriod(period);
         });
     });
 
-    // Função de exportar para PDF
+    // Filtro customizado
+    document.getElementById('applyCustomRange').addEventListener('click', () => {
+        const startInput = document.getElementById('startDate').value; // yyyy-mm-dd
+        const endInput = document.getElementById('endDate').value;
+
+        // Nenhuma data preenchida => sweetalert
+        if (!startInput && !endInput) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atenção',
+                text: 'Você não informou nenhuma data. Preencha ao menos uma das datas.',
+                confirmButtonColor: '#05664f'
+            });
+            return;
+        }
+
+        // Parse datas
+        let startDate = null;
+        let endDate = null;
+
+        if (startInput) {
+            const [sy, sm, sd] = startInput.split('-');
+            startDate = new Date(parseInt(sy, 10), parseInt(sm, 10) - 1, parseInt(sd, 10));
+        }
+        if (endInput) {
+            const [ey, em, ed] = endInput.split('-');
+            endDate = new Date(parseInt(ey, 10), parseInt(em, 10) - 1, parseInt(ed, 10));
+        }
+
+        // Se ambas as datas foram fornecidas, mas a final < inicial => sweetalert
+        if (startDate && endDate && endDate < startDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'A data final não pode ser anterior à data inicial.',
+                confirmButtonColor: '#05664f'
+            });
+            return;
+        }
+
+        // Filtra
+        filterByCustomRange(startDate, endDate);
+    });
+
+    // Exportar para PDF
     document.getElementById('export-pdf-button').addEventListener('click', function () {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -260,7 +401,7 @@
         doc.save('relatorio_doacoes.pdf');
     });
 
-    // Se quiser busca no front-end, basta o script filtrar no .donation-card e no .donations-table tr
+    // Busca por texto
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.addEventListener('input', function () {
@@ -281,5 +422,6 @@
             });
         });
     }
+});
 </script>
 {% endblock %}
